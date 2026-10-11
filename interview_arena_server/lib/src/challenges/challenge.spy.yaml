@@ -1,0 +1,20 @@
+### A recurring daily challenge. Global, server-only in pass 1.
+### Later phase: offline copy via a separate `database: client` table.
+class: Challenge
+table: challenge
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ### UTC midnight of the day this challenge is for.
+  scheduledFor: DateTime
+  title: String
+  prompt: String
+  category: QuestionCategory
+  difficulty: ChallengeDifficulty, default=medium
+  targetSkills: List<String>, serializationDataType=jsonb
+  rubric: List<String>?, serializationDataType=jsonb
+  timeLimit: Duration?
+  createdAt: DateTime, default=now
+indexes:
+  challenge_scheduled_for_uidx:
+    fields: scheduledFor
+    unique: true

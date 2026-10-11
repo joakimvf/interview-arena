@@ -1,0 +1,8 @@
+### Structured AI feedback for one answer. Stored as jsonb in Answer.feedback.
+class: AnswerFeedback
+fields:
+  summary: String
+  strengths: List<String>
+  improvements: List<String>
+  ### Skill name -> delta applied to the skill graph.
+  skillDeltas: Map<String, double>

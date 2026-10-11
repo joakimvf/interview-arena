@@ -1,0 +1,8 @@
+class: InterviewFinished
+extends: InterviewEvent
+fields:
+  ### Null when no answer could be evaluated (e.g. the AI was unavailable).
+  overallScore: double?
+  scores: InterviewScores?
+  summary: String
+  report: InterviewReport?

@@ -1,0 +1,9 @@
+### Structured result of AI resume parsing. Stored as jsonb in Resume.parsedData.
+class: ParsedResume
+fields:
+  fullName: String?
+  headline: String?
+  yearsOfExperience: double?
+  skills: List<ExtractedSkill>
+  experience: List<WorkExperience>
+  education: List<String>

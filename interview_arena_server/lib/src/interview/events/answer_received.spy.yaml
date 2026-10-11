@@ -1,0 +1,6 @@
+### Ack: the answer is persisted (sent before slow evaluation starts).
+class: AnswerReceived
+extends: InterviewEvent
+fields:
+  questionId: int
+  answerId: int

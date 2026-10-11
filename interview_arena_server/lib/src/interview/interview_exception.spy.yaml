@@ -1,0 +1,5 @@
+### Thrown inside interview methods. Reaches the client typed.
+exception: InterviewAccessException
+fields:
+  ### not_found | wrong_state
+  reason: String

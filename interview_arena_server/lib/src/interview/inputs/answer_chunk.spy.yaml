@@ -1,0 +1,6 @@
+### Partial transcript of the answer being spoken (client-side STT).
+class: AnswerChunk
+extends: CandidateInput
+fields:
+  questionId: int
+  textSoFar: String

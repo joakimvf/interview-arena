@@ -1,0 +1,7 @@
+class: WorkExperience
+fields:
+  title: String
+  company: String?
+  startDate: String?
+  endDate: String?
+  highlights: List<String>

@@ -1,0 +1,23 @@
+### One mock interview run by a signed-in user.
+class: InterviewSession
+table: interview_session
+fields:
+  authUser: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  ### Optional source resume; kept (FK nulled) if the resume is deleted.
+  resume: Resume?, relation(optional, onDelete=SetNull)
+  targetRole: String
+  status: InterviewStatus, default=pending
+  ### Latest aggregate live scores.
+  scores: InterviewScores?, serializationDataType=jsonb
+  overallScore: double?
+  questionCount: int, default=0
+  maxQuestions: int, default=6
+  summary: String?
+  ### Whole-interview feedback; null until the interview is completed.
+  report: InterviewReport?, serializationDataType=jsonb
+  startedAt: DateTime, default=now
+  endedAt: DateTime?
+  questions: List<Question>?, relation(name=session_questions)
+indexes:
+  interview_session_user_started_idx:
+    fields: authUserId, startedAt

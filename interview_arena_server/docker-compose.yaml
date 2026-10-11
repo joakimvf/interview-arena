@@ -1,0 +1,30 @@
+services:
+  # Development services
+  postgres:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "8090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: interview_arena
+      POSTGRES_PASSWORD: "${DEV_DATABASE_PASSWORD:?set to the development database password from config/passwords.yaml}"
+    volumes:
+      - interview_arena_data:/var/lib/postgresql/data
+
+
+  # Test services
+  postgres_test:
+    image: ghcr.io/serverpod/postgres:16
+    ports:
+      - "9090:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: interview_arena_test
+      POSTGRES_PASSWORD: "${TEST_DATABASE_PASSWORD:?set to the test database password from config/passwords.yaml}"
+    volumes:
+      - interview_arena_test_data:/var/lib/postgresql/data
+
+
+volumes:
+  interview_arena_data:
+  interview_arena_test_data:

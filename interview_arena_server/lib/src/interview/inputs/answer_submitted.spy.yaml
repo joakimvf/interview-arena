@@ -1,0 +1,6 @@
+class: AnswerSubmitted
+extends: CandidateInput
+fields:
+  questionId: int
+  transcript: String
+  answerDuration: Duration?

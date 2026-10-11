@@ -1,0 +1,22 @@
+### An uploaded resume PDF and its parse result.
+class: Resume
+table: resume
+fields:
+  authUser: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  fileName: String
+  ### Path inside the 'private' cloud storage. Derived server-side.
+  storagePath: String
+  sizeBytes: int
+  status: ResumeParseStatus, default=awaitingUpload
+  parsedData: ParsedResume?, serializationDataType=jsonb
+  parseError: String?
+  ### Model id that produced parsedData (e.g. claude-opus-5-5).
+  parseModel: String?, scope=serverOnly
+  createdAt: DateTime, default=now
+  parsedAt: DateTime?
+indexes:
+  resume_auth_user_created_idx:
+    fields: authUserId, createdAt
+  resume_storage_path_uidx:
+    fields: storagePath
+    unique: true

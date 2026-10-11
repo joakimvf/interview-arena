@@ -1,0 +1,7 @@
+class: AnswerEvaluated
+extends: InterviewEvent
+fields:
+  questionId: int
+  answerId: int
+  scores: InterviewScores
+  feedback: AnswerFeedback

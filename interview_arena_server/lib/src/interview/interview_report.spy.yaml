@@ -1,0 +1,9 @@
+### Whole-interview feedback, written once the interview ends.
+class: InterviewReport
+fields:
+  ### Overall impression in a few sentences.
+  summary: String
+  strengths: List<String>
+  improvements: List<String>
+  ### Short topic names to study next, e.g. "Database sharding".
+  focusAreas: List<String>

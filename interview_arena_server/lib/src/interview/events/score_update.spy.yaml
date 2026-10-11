@@ -1,0 +1,7 @@
+### Live five scores (partial-answer estimate or post-evaluation aggregate).
+class: ScoreUpdate
+extends: InterviewEvent
+fields:
+  questionId: int?
+  isPartial: bool, default=false
+  scores: InterviewScores

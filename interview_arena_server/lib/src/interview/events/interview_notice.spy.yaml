@@ -1,0 +1,6 @@
+### Non-fatal problem (AI overloaded, refusal, ...). The stream stays open.
+class: InterviewNotice
+extends: InterviewEvent
+fields:
+  code: String
+  message: String

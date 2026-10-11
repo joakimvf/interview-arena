@@ -1,0 +1,8 @@
+class: QuestionAsked
+extends: InterviewEvent
+fields:
+  questionId: int
+  orderIndex: int
+  category: QuestionCategory
+  prompt: String
+  isFollowUp: bool, default=false

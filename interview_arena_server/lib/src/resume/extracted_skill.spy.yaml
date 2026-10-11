@@ -1,0 +1,8 @@
+### A skill the AI extracted from a resume.
+class: ExtractedSkill
+fields:
+  name: String
+  category: String?
+  ### 0.0 - 1.0 confidence that the candidate has this skill.
+  confidence: double, default=0.5
+  evidence: String?

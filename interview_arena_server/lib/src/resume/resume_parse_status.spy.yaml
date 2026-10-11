@@ -1,0 +1,8 @@
+enum: ResumeParseStatus
+serialized: byName
+default: awaitingUpload
+values:
+  - awaitingUpload
+  - parsing
+  - parsed
+  - failed

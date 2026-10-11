@@ -1,0 +1,29 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+greeting:
+  - hello:
+interview:
+  - start:
+  - getInterview:
+  - listInterviews:
+  - conduct:
+voice:
+  - questionAudio:
+profile:
+  - me:
+  - updateMe:
+resume:
+  - createUpload:
+  - completeUpload:
+  - getResume:
+  - listResumes:
+  - deleteResume:

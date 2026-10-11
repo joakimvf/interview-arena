@@ -1,0 +1,7 @@
+### Server -> client event on the live interview stream.
+class: InterviewEvent
+sealed: true
+fields:
+  interviewSessionId: int
+  ### Monotonic per conduct() call.
+  sequence: int

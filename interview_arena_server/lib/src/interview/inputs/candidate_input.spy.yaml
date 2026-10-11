@@ -1,0 +1,6 @@
+### Client -> server message on the live interview stream.
+class: CandidateInput
+sealed: true
+fields:
+  ### Client-side monotonic counter (idempotency / debugging).
+  clientSeq: int

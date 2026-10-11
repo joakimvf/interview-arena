@@ -1,0 +1,6 @@
+### Returned by ResumeEndpoint.createUpload.
+class: ResumeUploadTicket
+fields:
+  resumeId: int
+  ### JSON upload description for FileUploader on the client.
+  uploadDescription: String

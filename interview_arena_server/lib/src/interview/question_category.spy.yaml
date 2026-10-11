@@ -1,0 +1,9 @@
+enum: QuestionCategory
+serialized: byName
+default: behavioral
+values:
+  - behavioral
+  - technical
+  - systemDesign
+  - situational
+  - resumeDeepDive

@@ -1,0 +1,7 @@
+class: Weakness
+fields:
+  skill: String
+  description: String
+  severity: double
+  ### Answer ids that demonstrate the weakness (career-memory hits).
+  exampleAnswerIds: List<int>

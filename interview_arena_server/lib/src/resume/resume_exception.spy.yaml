@@ -1,0 +1,4 @@
+exception: ResumeException
+fields:
+  ### invalid_size | not_found | not_uploaded | not_pdf | wrong_state
+  reason: String

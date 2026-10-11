@@ -1,0 +1,8 @@
+### The five live scores, each 0-100.
+class: InterviewScores
+fields:
+  communication: double, default=0
+  confidence: double, default=0
+  technicalDepth: double, default=0
+  completeness: double, default=0
+  structure: double, default=0

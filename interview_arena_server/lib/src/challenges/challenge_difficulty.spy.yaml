@@ -1,0 +1,7 @@
+enum: ChallengeDifficulty
+serialized: byName
+default: medium
+values:
+  - easy
+  - medium
+  - hard

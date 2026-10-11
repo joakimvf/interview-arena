@@ -1,0 +1,17 @@
+### App-level profile for a signed-in candidate. One row per auth user.
+class: CandidateProfile
+table: candidate_profile
+fields:
+  ### Owner: UuidValue FK to serverpod_auth_core_user, cascade on account deletion.
+  authUser: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
+  displayName: String?
+  targetRole: String?
+  yearsOfExperience: double?
+  ### IANA time zone name, used later for the daily challenge.
+  timeZone: String, default='UTC'
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  candidate_profile_auth_user_uidx:
+    fields: authUserId
+    unique: true

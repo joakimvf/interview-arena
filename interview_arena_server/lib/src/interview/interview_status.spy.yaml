@@ -1,0 +1,9 @@
+enum: InterviewStatus
+serialized: byName
+default: pending
+values:
+  - pending
+  - active
+  - interrupted
+  - completed
+  - abandoned

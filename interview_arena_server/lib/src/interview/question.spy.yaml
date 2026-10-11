@@ -1,0 +1,16 @@
+### A question asked during an interview session.
+class: Question
+table: question
+fields:
+  interviewSession: InterviewSession?, relation(name=session_questions, onDelete=Cascade)
+  orderIndex: int
+  category: QuestionCategory
+  prompt: String
+  targetSkills: List<String>, serializationDataType=jsonb
+  isFollowUp: bool, default=false
+  askedAt: DateTime, default=now
+  answers: List<Answer>?, relation(name=question_answers)
+indexes:
+  question_session_order_uidx:
+    fields: interviewSessionId, orderIndex
+    unique: true
