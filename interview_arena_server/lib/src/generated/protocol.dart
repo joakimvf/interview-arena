@@ -21,13 +21,13 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
+import 'auth/sign_up_closed_exception.dart' as _i8uejmxn;
 import 'challenges/challenge.dart' as _iylq4q0i;
 import 'challenges/challenge_difficulty.dart' as _igs032ca;
 import 'future_calls_generated_models/answer_embedding_future_call_embed_model.dart'
     as _ir28uvix;
 import 'future_calls_generated_models/resume_parse_future_call_parse_model.dart'
     as _ifd0qwzd;
-import 'greetings/greeting.dart' as _izw8z7ou;
 import 'interview/answer.dart' as _ilptq4di;
 import 'interview/answer_feedback.dart' as _iq8f7lpk;
 import 'interview/events/interview_event.dart' as _i9r9cihw;
@@ -50,9 +50,9 @@ import 'resume/work_experience.dart' as _iq8k1g78;
 import 'skills/skill_node.dart' as _ifilxtcy;
 import 'skills/skill_profile.dart' as _ioq46cla;
 import 'skills/weakness.dart' as _i7w5oxf5;
+export 'auth/sign_up_closed_exception.dart';
 export 'challenges/challenge.dart';
 export 'challenges/challenge_difficulty.dart';
-export 'greetings/greeting.dart';
 export 'interview/answer.dart';
 export 'interview/answer_feedback.dart';
 export 'interview/events/interview_event.dart';
@@ -884,6 +884,9 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
 
+    if (t == _i8uejmxn.SignUpClosedException) {
+      return _i8uejmxn.SignUpClosedException.fromJson(data) as T;
+    }
     if (t == _iylq4q0i.Challenge) {
       return _iylq4q0i.Challenge.fromJson(data) as T;
     }
@@ -895,9 +898,6 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _ifd0qwzd.ResumeParseFutureCallParseModel) {
       return _ifd0qwzd.ResumeParseFutureCallParseModel.fromJson(data) as T;
-    }
-    if (t == _izw8z7ou.Greeting) {
-      return _izw8z7ou.Greeting.fromJson(data) as T;
     }
     if (t == _ilptq4di.Answer) {
       return _ilptq4di.Answer.fromJson(data) as T;
@@ -986,6 +986,12 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i7w5oxf5.Weakness) {
       return _i7w5oxf5.Weakness.fromJson(data) as T;
     }
+    if (t == _is.getType<_i8uejmxn.SignUpClosedException?>()) {
+      return (data != null
+              ? _i8uejmxn.SignUpClosedException.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _is.getType<_iylq4q0i.Challenge?>()) {
       return (data != null ? _iylq4q0i.Challenge.fromJson(data) : null) as T;
     }
@@ -1006,9 +1012,6 @@ class Protocol extends _is.DatabaseSerializationManager {
               ? _ifd0qwzd.ResumeParseFutureCallParseModel.fromJson(data)
               : null)
           as T;
-    }
-    if (t == _is.getType<_izw8z7ou.Greeting?>()) {
-      return (data != null ? _izw8z7ou.Greeting.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_ilptq4di.Answer?>()) {
       return (data != null ? _ilptq4di.Answer.fromJson(data) : null) as T;
@@ -1217,13 +1220,13 @@ class Protocol extends _is.DatabaseSerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _i8uejmxn.SignUpClosedException => 'SignUpClosedException',
       _iylq4q0i.Challenge => 'Challenge',
       _igs032ca.ChallengeDifficulty => 'ChallengeDifficulty',
       _ir28uvix.AnswerEmbeddingFutureCallEmbedModel =>
         'AnswerEmbeddingFutureCallEmbedModel',
       _ifd0qwzd.ResumeParseFutureCallParseModel =>
         'ResumeParseFutureCallParseModel',
-      _izw8z7ou.Greeting => 'Greeting',
       _ilptq4di.Answer => 'Answer',
       _iq8f7lpk.AnswerFeedback => 'AnswerFeedback',
       _i9r9cihw.AnswerEvaluated => 'AnswerEvaluated',
@@ -1270,6 +1273,8 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
 
     switch (data) {
+      case _i8uejmxn.SignUpClosedException():
+        return 'SignUpClosedException';
       case _iylq4q0i.Challenge():
         return 'Challenge';
       case _igs032ca.ChallengeDifficulty():
@@ -1278,8 +1283,6 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'AnswerEmbeddingFutureCallEmbedModel';
       case _ifd0qwzd.ResumeParseFutureCallParseModel():
         return 'ResumeParseFutureCallParseModel';
-      case _izw8z7ou.Greeting():
-        return 'Greeting';
       case _ilptq4di.Answer():
         return 'Answer';
       case _iq8f7lpk.AnswerFeedback():
@@ -1364,6 +1367,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'SignUpClosedException') {
+      return deserialize<_i8uejmxn.SignUpClosedException>(data['data']);
+    }
     if (dataClassName == 'Challenge') {
       return deserialize<_iylq4q0i.Challenge>(data['data']);
     }
@@ -1379,9 +1385,6 @@ class Protocol extends _is.DatabaseSerializationManager {
       return deserialize<_ifd0qwzd.ResumeParseFutureCallParseModel>(
         data['data'],
       );
-    }
-    if (dataClassName == 'Greeting') {
-      return deserialize<_izw8z7ou.Greeting>(data['data']);
     }
     if (dataClassName == 'Answer') {
       return deserialize<_ilptq4di.Answer>(data['data']);

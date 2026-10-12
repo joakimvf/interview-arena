@@ -21,6 +21,13 @@ insightsServer:
   publicScheme: http
 
 
+# Configuration for the web server, which serves the Flutter web app.
+webServer:
+  port: 8082
+  publicHost: localhost
+  publicPort: 8082
+  publicScheme: http
+
 # This is the database setup for your server.
 database:
   host: localhost

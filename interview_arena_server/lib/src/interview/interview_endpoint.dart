@@ -4,9 +4,11 @@ import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart'; // authUserId extension
 
 import '../ai/interview_ai.dart';
+import '../background.dart';
 import '../generated/future_calls.dart'; // ServerpodFutureCallsGetter
 import '../generated/protocol.dart';
 import '../skills/skill_graph.dart';
+import 'answer_embedding_future_call.dart';
 import 'voice_endpoint.dart';
 
 class InterviewEndpoint extends Endpoint {
@@ -350,13 +352,18 @@ class InterviewEndpoint extends Endpoint {
                 eval.feedback,
                 answer.id!,
               );
-              await session.serverpod.futureCalls
-                  .callWithDelay(
-                    Duration.zero,
-                    identifier: 'embed-${answer.id}',
-                  )
-                  .answerEmbedding
-                  .embed(answer.id!);
+              await scheduleOrRun(
+                session,
+                name: 'Answer ${answer.id} embedding',
+                schedule: () => session.serverpod.futureCalls
+                    .callWithDelay(
+                      Duration.zero,
+                      identifier: 'embed-${answer.id}',
+                    )
+                    .answerEmbedding
+                    .embed(answer.id!),
+                run: (s) => AnswerEmbeddingFutureCall().embed(s, answer.id!),
+              );
               return (eval: eval, agg: agg);
             } catch (e) {
               evalError = e;

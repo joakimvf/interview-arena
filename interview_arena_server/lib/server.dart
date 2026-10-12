@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'package:serverpod_cloud_storage/serverpod_cloud_storage.dart';
 
+import 'src/auth/sign_up_policy.dart';
 import 'src/generated/serverpod.dart';
 import 'src/profile/profile_hooks.dart';
+import 'src/web/routes/app_config_route.dart';
 
 /// The starting point of the Serverpod server.
 void run(List<String> args) async {
@@ -51,6 +55,24 @@ void run(List<String> args) async {
     ),
   );
 
+  // The Flutter web app reads its API address from assets/config.json; serve
+  // one built from this server's public API config so a deployed app talks
+  // to its own API (the bundled file points at localhost).
+  pod.webServer.addRoute(
+    AppConfigRoute(apiConfig: pod.config.apiServer),
+    '/assets/assets/config.json',
+  );
+
+  // Serve the Flutter web app if it has been built (the flutter_build script,
+  // run before every Cloud deploy, writes it to web/app).
+  final appDir = Directory(Uri(path: 'web/app').toFilePath());
+  if (appDir.existsSync()) {
+    pod.webServer.addRoute(FlutterRoute(appDir, enableWasmHeaders: false), '/');
+  }
+
   // Start the server.
   await pod.start();
+
+  // Sign-up is closed on deployed servers; create the pre-made accounts.
+  await createConfiguredAccounts(pod);
 }

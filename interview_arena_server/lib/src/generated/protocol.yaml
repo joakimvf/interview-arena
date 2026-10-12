@@ -1,6 +1,6 @@
 emailIdp:
-  - login:
   - startRegistration:
+  - login:
   - verifyRegistrationCode:
   - finishRegistration:
   - startPasswordReset:
@@ -9,8 +9,6 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
-greeting:
-  - hello:
 interview:
   - start:
   - getInterview:

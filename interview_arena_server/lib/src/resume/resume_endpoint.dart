@@ -3,8 +3,10 @@ import 'dart:typed_data';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart'; // authUserId extension
 
+import '../background.dart';
 import '../generated/future_calls.dart'; // ServerpodFutureCallsGetter
 import '../generated/protocol.dart';
+import 'resume_parse_future_call.dart';
 
 /// Resume PDF: createUpload -> (client FileUploader) -> completeUpload ->
 /// ResumeParseFutureCall (async) -> client polls getResume.
@@ -105,10 +107,15 @@ class ResumeEndpoint extends Endpoint {
       resume.copyWith(status: ResumeParseStatus.parsing, parseError: null),
     );
     // Async: a Claude PDF parse can exceed the client's 20 s call timeout.
-    await session.serverpod.futureCalls
-        .callWithDelay(Duration.zero, identifier: 'resume-parse-$resumeId')
-        .resumeParse
-        .parse(resumeId);
+    await scheduleOrRun(
+      session,
+      name: 'Resume $resumeId parse',
+      schedule: () => session.serverpod.futureCalls
+          .callWithDelay(Duration.zero, identifier: 'resume-parse-$resumeId')
+          .resumeParse
+          .parse(resumeId),
+      run: (s) => ResumeParseFutureCall().parse(s, resumeId),
+    );
     return parsing;
   }
 

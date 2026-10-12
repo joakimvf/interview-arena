@@ -1,0 +1,4 @@
+# Cloud deploys skip gitignored files by default. The Flutter web build
+# (the flutter_build pre-deploy script writes it to web/app) must be uploaded.
+!web/app/
+!web/app/**

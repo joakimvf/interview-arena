@@ -1,0 +1,5 @@
+### Thrown when someone tries to create an account on a server where sign-up
+### is closed (every deployed server; see sign_up_policy.dart).
+exception: SignUpClosedException
+fields:
+  message: String

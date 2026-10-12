@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:interview_arena_client/interview_arena_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import '../../core/client_providers.dart';
@@ -42,15 +43,31 @@ class SignInPage extends ConsumerWidget {
                 const SizedBox(height: 32),
                 SignInWidget(
                   client: ref.watch(clientProvider),
+                  // Sign-up is closed on the deployed app (accounts are
+                  // handed out), so open on the login form.
+                  emailSignInWidget: EmailSignInWidget(
+                    client: ref.watch(clientProvider),
+                    startScreen: EmailFlowScreen.login,
+                    onError: (error) => _showError(context, error),
+                  ),
                   onAuthenticated: () {},
-                  onError: (error) =>
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Sign-in failed: $error')),
-                      ),
+                  onError: (error) => _showError(context, error),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  static void _showError(BuildContext context, Object error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error is SignUpClosedException
+              ? error.message
+              : 'Sign-in failed. Check your email and password.',
         ),
       ),
     );

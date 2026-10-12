@@ -13,8 +13,6 @@
 import 'dart:async' as _ida;
 import 'dart:typed_data' as _idt;
 import 'package:http/http.dart' as _i85jenna;
-import 'package:interview_arena_client/src/protocol/greetings/greeting.dart'
-    as _isxqzjik;
 import 'package:interview_arena_client/src/protocol/interview/events/interview_event.dart'
     as _imk1u46l;
 import 'package:interview_arena_client/src/protocol/interview/inputs/candidate_input.dart'
@@ -44,6 +42,16 @@ class EndpointEmailIdp extends _iaic.EndpointEmailIdpBase {
   @override
   String get name => 'emailIdp';
 
+  /// Sign-up is closed on deployed servers (see [signUpOpen]). Every
+  /// registration starts here, so blocking this blocks the whole flow.
+  @override
+  _ida.Future<_isc.UuidValue> startRegistration({required String email}) =>
+      caller.callServerEndpoint<_isc.UuidValue>(
+        'emailIdp',
+        'startRegistration',
+        {'email': email},
+      );
+
   /// Logs in the user and returns a new session.
   ///
   /// Throws an [EmailAccountLoginException] in case of errors, with reason:
@@ -65,24 +73,6 @@ class EndpointEmailIdp extends _iaic.EndpointEmailIdpBase {
       'password': password,
     },
   );
-
-  /// Starts the registration for a new user account with an email-based login
-  /// associated to it.
-  ///
-  /// Upon successful completion of this method, an email will have been
-  /// sent to [email] with a verification link, which the user must open to
-  /// complete the registration.
-  ///
-  /// Always returns a account request ID, which can be used to complete the
-  /// registration. If the email is already registered, the returned ID will not
-  /// be valid.
-  @override
-  _ida.Future<_isc.UuidValue> startRegistration({required String email}) =>
-      caller.callServerEndpoint<_isc.UuidValue>(
-        'emailIdp',
-        'startRegistration',
-        {'email': email},
-      );
 
   /// Verifies an account request code and returns a token
   /// that can be used to complete the account creation.
@@ -256,24 +246,6 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
         'refreshAccessToken',
         {'refreshToken': refreshToken},
         authenticated: false,
-      );
-}
-
-/// This is an example endpoint that returns a greeting message through
-/// its [hello] method.
-/// {@category Endpoint}
-class EndpointGreeting extends _isc.EndpointRef {
-  EndpointGreeting(_isc.EndpointCaller caller) : super(caller);
-
-  @override
-  String get name => 'greeting';
-
-  /// Returns a personalized greeting message: "Hello {name}".
-  _ida.Future<_isxqzjik.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_isxqzjik.Greeting>(
-        'greeting',
-        'hello',
-        {'name': name},
       );
 }
 
@@ -465,7 +437,6 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
-    greeting = EndpointGreeting(this);
     interview = EndpointInterview(this);
     voice = EndpointVoice(this);
     profile = EndpointProfile(this);
@@ -476,8 +447,6 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
-
-  late final EndpointGreeting greeting;
 
   late final EndpointInterview interview;
 
@@ -493,7 +462,6 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
-    'greeting': greeting,
     'interview': interview,
     'voice': voice,
     'profile': profile,

@@ -20,9 +20,9 @@ import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'auth/sign_up_closed_exception.dart' as _i8uejmxn;
 import 'challenges/challenge.dart' as _iylq4q0i;
 import 'challenges/challenge_difficulty.dart' as _igs032ca;
-import 'greetings/greeting.dart' as _izw8z7ou;
 import 'interview/answer.dart' as _ilptq4di;
 import 'interview/answer_feedback.dart' as _iq8f7lpk;
 import 'interview/events/interview_event.dart' as _i9r9cihw;
@@ -45,9 +45,9 @@ import 'resume/work_experience.dart' as _iq8k1g78;
 import 'skills/skill_node.dart' as _ifilxtcy;
 import 'skills/skill_profile.dart' as _ioq46cla;
 import 'skills/weakness.dart' as _i7w5oxf5;
+export 'auth/sign_up_closed_exception.dart';
 export 'challenges/challenge.dart';
 export 'challenges/challenge_difficulty.dart';
-export 'greetings/greeting.dart';
 export 'interview/answer.dart';
 export 'interview/answer_feedback.dart';
 export 'interview/events/interview_event.dart';
@@ -106,14 +106,14 @@ class Protocol extends _isc.SerializationManager {
       }
     }
 
+    if (t == _i8uejmxn.SignUpClosedException) {
+      return _i8uejmxn.SignUpClosedException.fromJson(data) as T;
+    }
     if (t == _iylq4q0i.Challenge) {
       return _iylq4q0i.Challenge.fromJson(data) as T;
     }
     if (t == _igs032ca.ChallengeDifficulty) {
       return _igs032ca.ChallengeDifficulty.fromJson(data) as T;
-    }
-    if (t == _izw8z7ou.Greeting) {
-      return _izw8z7ou.Greeting.fromJson(data) as T;
     }
     if (t == _ilptq4di.Answer) {
       return _ilptq4di.Answer.fromJson(data) as T;
@@ -202,6 +202,12 @@ class Protocol extends _isc.SerializationManager {
     if (t == _i7w5oxf5.Weakness) {
       return _i7w5oxf5.Weakness.fromJson(data) as T;
     }
+    if (t == _isc.getType<_i8uejmxn.SignUpClosedException?>()) {
+      return (data != null
+              ? _i8uejmxn.SignUpClosedException.fromJson(data)
+              : null)
+          as T;
+    }
     if (t == _isc.getType<_iylq4q0i.Challenge?>()) {
       return (data != null ? _iylq4q0i.Challenge.fromJson(data) : null) as T;
     }
@@ -210,9 +216,6 @@ class Protocol extends _isc.SerializationManager {
               ? _igs032ca.ChallengeDifficulty.fromJson(data)
               : null)
           as T;
-    }
-    if (t == _isc.getType<_izw8z7ou.Greeting?>()) {
-      return (data != null ? _izw8z7ou.Greeting.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_ilptq4di.Answer?>()) {
       return (data != null ? _ilptq4di.Answer.fromJson(data) : null) as T;
@@ -418,9 +421,9 @@ class Protocol extends _isc.SerializationManager {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _i8uejmxn.SignUpClosedException => 'SignUpClosedException',
       _iylq4q0i.Challenge => 'Challenge',
       _igs032ca.ChallengeDifficulty => 'ChallengeDifficulty',
-      _izw8z7ou.Greeting => 'Greeting',
       _ilptq4di.Answer => 'Answer',
       _iq8f7lpk.AnswerFeedback => 'AnswerFeedback',
       _i9r9cihw.AnswerEvaluated => 'AnswerEvaluated',
@@ -467,12 +470,12 @@ class Protocol extends _isc.SerializationManager {
     }
 
     switch (data) {
+      case _i8uejmxn.SignUpClosedException():
+        return 'SignUpClosedException';
       case _iylq4q0i.Challenge():
         return 'Challenge';
       case _igs032ca.ChallengeDifficulty():
         return 'ChallengeDifficulty';
-      case _izw8z7ou.Greeting():
-        return 'Greeting';
       case _ilptq4di.Answer():
         return 'Answer';
       case _iq8f7lpk.AnswerFeedback():
@@ -553,14 +556,14 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'SignUpClosedException') {
+      return deserialize<_i8uejmxn.SignUpClosedException>(data['data']);
+    }
     if (dataClassName == 'Challenge') {
       return deserialize<_iylq4q0i.Challenge>(data['data']);
     }
     if (dataClassName == 'ChallengeDifficulty') {
       return deserialize<_igs032ca.ChallengeDifficulty>(data['data']);
-    }
-    if (dataClassName == 'Greeting') {
-      return deserialize<_izw8z7ou.Greeting>(data['data']);
     }
     if (dataClassName == 'Answer') {
       return deserialize<_ilptq4di.Answer>(data['data']);
