@@ -1,0 +1,106 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 5685 >>
+stream
+BT 0 0 0 rg /F2 22 Tf 54 766.0 Td (Johan Ekstrˆm) Tj ET
+BT 0.12 0.25 0.55 rg /F1 12.5 Tf 54 747.5 Td (Senior .NET Developer) Tj ET
+BT 0.35 0.35 0.35 rg /F1 8.5 Tf 54 733.5 Td (Gothenburg, Sweden  |  johan.ekstrom@example.com  |  +46 70 000 00 00  |  github.com/example-jekstrom) Tj ET
+BT 0.12 0.25 0.55 rg /F2 10.5 Tf 54 709.5 Td (PROFILE) Tj ET
+0.12 0.25 0.55 RG 0.8 w 54 704.0 m 541 704.0 l S
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 688.5 Td (Backend-focused .NET developer with 7 years of experience designing and running cloud services on) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 674.7 Td (Azure. Strong in C#, ASP.NET Core and SQL Server, with hands-on ownership of microservices, messaging) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 661.0 Td (and CI/CD. Comfortable leading small teams and mentoring juniors; currently deepening skills in) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 647.2 Td (distributed systems design and observability.) Tj ET
+BT 0.12 0.25 0.55 rg /F2 10.5 Tf 54 624.4 Td (EXPERIENCE) Tj ET
+0.12 0.25 0.55 RG 0.8 w 54 618.9 m 541 618.9 l S
+BT 0 0 0 rg /F2 10.5 Tf 54 602.4 Td (Senior .NET Developer) Tj ET
+BT 0.35 0.35 0.35 rg /F3 9 Tf 478.0 603.9 Td (2022 - present) Tj ET
+BT 0.3 0.3 0.3 rg /F3 9.5 Tf 54 590.4 Td (Fabrikam Logistics, Gothenburg) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 575.4 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 575.4 Td (Lead developer for the shipment-tracking platform: 14 ASP.NET Core microservices on Azure) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 561.6 Td (Kubernetes Service handling 40 million events per day.) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 547.8 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 547.8 Td (Replaced a polling integration with Azure Service Bus and the outbox pattern, cutting end-to-end) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 534.0 Td (delivery latency from 5 minutes to under 10 seconds.) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 520.3 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 520.3 Td (Introduced OpenTelemetry tracing and Application Insights dashboards; mean time to resolve) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 506.5 Td (incidents dropped by roughly 40 percent.) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 492.7 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 492.7 Td (Mentor three developers and run the weekly architecture review; led the .NET 8 upgrade.) Tj ET
+BT 0 0 0 rg /F2 10.5 Tf 54 473.9 Td (.NET Developer) Tj ET
+BT 0.35 0.35 0.35 rg /F3 9 Tf 491.5 475.4 Td (2019 - 2022) Tj ET
+BT 0.3 0.3 0.3 rg /F3 9.5 Tf 54 461.9 Td (Contoso Bank, Stockholm) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 446.9 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 446.9 Td (Built REST and gRPC APIs in ASP.NET Core for the mobile banking app \(about 600,000 monthly users\).) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 433.1 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 433.1 Td (Designed the payments ledger schema in SQL Server with Entity Framework Core; added optimistic) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 419.3 Td (concurrency and idempotency keys to prevent double payments.) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 405.6 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 405.6 Td (Reduced p95 response time of the account overview endpoint from 1.2 s to 180 ms with query tuning) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 391.8 Td (and Redis caching.) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 378.0 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 378.0 Td (Set up Azure DevOps pipelines with automated xUnit and integration test runs on every pull request.) Tj ET
+BT 0 0 0 rg /F2 10.5 Tf 54 359.2 Td (Junior Developer) Tj ET
+BT 0.35 0.35 0.35 rg /F3 9 Tf 491.5 360.7 Td (2017 - 2019) Tj ET
+BT 0.3 0.3 0.3 rg /F3 9.5 Tf 54 347.2 Td (Northwind Retail, Stockholm) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 332.2 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 332.2 Td (Maintained an ASP.NET MVC e-commerce site and migrated parts of it to ASP.NET Core.) Tj ET
+BT 0.2 0.3 0.6 rg /F1 9.5 Tf 56 318.4 Td (ï) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 68 318.4 Td (Wrote background jobs with Hangfire for order exports and nightly stock synchronisation.) Tj ET
+BT 0.12 0.25 0.55 rg /F2 10.5 Tf 54 295.6 Td (SKILLS) Tj ET
+0.12 0.25 0.55 RG 0.8 w 54 290.1 m 541 290.1 l S
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 274.6 Td (Languages: C#, T-SQL, TypeScript \(basic\), Bash) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 260.9 Td (Frameworks: ASP.NET Core, Entity Framework Core, Blazor, MassTransit, MediatR, xUnit, Moq) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 247.1 Td (Cloud & DevOps: Azure \(AKS, App Service, Functions, Service Bus, Key Vault\), Docker, Kubernetes,) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 233.3 Td (Terraform, Azure DevOps, GitHub Actions) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 219.5 Td (Data & Messaging: SQL Server, PostgreSQL, Redis, Azure Cosmos DB, RabbitMQ) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 205.8 Td (Practices: Clean Architecture, Domain-Driven Design, CQRS, TDD, code review, incident on-call) Tj ET
+BT 0.12 0.25 0.55 rg /F2 10.5 Tf 54 183.0 Td (EDUCATION) Tj ET
+0.12 0.25 0.55 RG 0.8 w 54 177.5 m 541 177.5 l S
+BT 0 0 0 rg /F2 10.5 Tf 54 161.0 Td (MSc Computer Science and Engineering) Tj ET
+BT 0.35 0.35 0.35 rg /F3 9 Tf 491.5 162.5 Td (2012 - 2017) Tj ET
+BT 0.3 0.3 0.3 rg /F3 9.5 Tf 54 148.9 Td (Chalmers University of Technology) Tj ET
+BT 0.12 0.25 0.55 rg /F2 10.5 Tf 54 124.9 Td (CERTIFICATIONS & LANGUAGES) Tj ET
+0.12 0.25 0.55 RG 0.8 w 54 119.4 m 541 119.4 l S
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 103.9 Td (Microsoft Certified: Azure Developer Associate \(AZ-204\), 2021) Tj ET
+BT 0.15 0.15 0.15 rg /F1 9.5 Tf 54 90.2 Td (Swedish \(native\), English \(fluent\), German \(basic\)) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 6 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+7 0 obj
+<< /Title (Johan Ekstrom - CV) /Author (Fictional sample) >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 6 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000112 00000 n 
+0000000214 00000 n 
+0000000319 00000 n 
+0000006056 00000 n 
+0000006202 00000 n 
+0000006259 00000 n 
+0000006335 00000 n 
+trailer
+<< /Size 9 /Root 8 0 R /Info 7 0 R >>
+startxref
+6384
+%%EOF
