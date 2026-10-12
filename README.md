@@ -48,7 +48,6 @@ The whole backend is Serverpod 4, hosted on Serverpod Cloud.
 - **ElevenLabs** (`eleven_v4_turbo`) is the interviewer's voice. The server calls it, so the key never reaches the app.
 - **Speech-to-text** runs in the browser/OS through the `speech_to_text` package.
 - **Voyage AI** for embeddings (optional, see pgvector above).
-- We built this with help from an AI coding assistant (Claude Code).
 
 ## Run it yourself
 
