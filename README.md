@@ -28,6 +28,10 @@ The interviewer reads each question out loud. You answer by talking, and you can
 
 When it's over you get an overall score, what went well, what to improve and topics to study next, plus a breakdown of every question with your answer and its feedback.
 
+### Multiple languages
+
+The interview follows the language of your CV. Claude detects it when it parses the CV and runs the whole interview in that language, ElevenLabs speaks the questions in it, and speech-to-text listens in it too, so your answers come out in the right language. The feedback and suggested roles follow along. We've tried it with English, Swedish and Spanish.
+
 ## How we use Serverpod
 
 The whole backend is Serverpod 4, hosted on Serverpod Cloud.
