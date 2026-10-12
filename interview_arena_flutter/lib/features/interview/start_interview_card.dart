@@ -15,12 +15,13 @@ class StartInterviewCard extends ConsumerStatefulWidget {
 }
 
 class _StartInterviewCardState extends ConsumerState<StartInterviewCard> {
-  static const _quickRoles = [
-    'Senior Backend Engineer',
-    'Frontend Engineer',
+  /// Shown only until a CV is analyzed; then the CV's suggested roles are.
+  static const _genericRoles = [
+    'Software Engineer',
     'Product Manager',
-    'Engineering Manager',
-    'Data Scientist',
+    'Project Manager',
+    'Marketing Specialist',
+    'Sales Manager',
   ];
 
   final _role = TextEditingController();
@@ -67,6 +68,8 @@ class _StartInterviewCardState extends ConsumerState<StartInterviewCard> {
     final theme = Theme.of(context);
     final resume = _latestParsed(ref.watch(resumesProvider).value);
     final headline = resume?.parsedData?.headline;
+    final suggested = resume?.parsedData?.suggestedRoles ?? const [];
+    final roles = suggested.isEmpty ? _genericRoles : suggested;
     if (!_prefilled && headline != null && _role.text.isEmpty) {
       _prefilled = true;
       _role.text = headline;
@@ -88,11 +91,18 @@ class _StartInterviewCardState extends ConsumerState<StartInterviewCard> {
               onSubmitted: (_) => _start(resume),
             ),
             const SizedBox(height: 12),
+            if (suggested.isNotEmpty) ...[
+              Text(
+                'Suggested from your CV',
+                style: theme.textTheme.labelMedium,
+              ),
+              const SizedBox(height: 6),
+            ],
             Wrap(
               spacing: 6,
               runSpacing: 6,
               children: [
-                for (final r in _quickRoles)
+                for (final r in roles)
                   ChoiceChip(
                     label: Text(r),
                     selected: _role.text == r,

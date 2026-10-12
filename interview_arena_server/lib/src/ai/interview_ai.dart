@@ -108,12 +108,15 @@ class ClaudeInterviewAi implements InterviewAi {
       'Ask exactly one next question. Adapt: follow up on vague or shallow '
       'answers, probe claimed skills from the resume, and vary categories. '
       'If the transcript is empty, ask a warm opening question about the '
-      'candidate background relevant to the role.';
+      'candidate background relevant to the role. Hold the whole interview '
+      'in the language given by the language field of the resume (English if '
+      'there is none).';
   static const scoringSystem =
       'You are an interview coach scoring one answer. Score each dimension '
       'from 0 to 100: communication, confidence, technicalDepth, completeness, '
       'structure. Be calibrated: 50 is an average hireable answer. Give short, '
-      'actionable feedback addressed to the candidate.';
+      'actionable feedback addressed to the candidate. Write the feedback '
+      'in the language the candidate answered in.';
   static const partialSystem =
       'You estimate live interview scores (0-100 per dimension) for an answer '
       'that is still being spoken. Judge only what is there so far.';
@@ -123,10 +126,15 @@ class ClaudeInterviewAi implements InterviewAi {
       'how they would come across to a real interviewer); strengths (2-4 '
       'specific things they did well, citing their answers); improvements '
       '(2-4 concrete, actionable changes for next time); focusAreas (2-5 '
-      'short topic names to study next, e.g. "Database sharding").';
+      'short topic names to study next, e.g. "Database sharding"). Write '
+      'everything in the language the candidate answered in.';
   static const resumeSystem =
       'Extract the candidate profile from the resume. Use only facts present '
-      'in the document. Use null when a field is unknown.';
+      'in the document. Use null when a field is unknown. Also return '
+      'language: the BCP 47 tag, with region, of the language the resume is '
+      'written in (e.g. sv-SE, en-US); and suggestedRoles: 3-5 job titles '
+      'this candidate could realistically interview for next given their '
+      'actual experience, written in the language of the resume.';
 
   static final _scoreProps = {
     for (final k in [
@@ -225,6 +233,8 @@ class ClaudeInterviewAi implements InterviewAi {
       }),
     },
     'education': _strList,
+    'language': _str,
+    'suggestedRoles': _strList,
   });
 
   /// Append-only content blocks: [context] + one block per answered turn.
@@ -439,6 +449,10 @@ class ClaudeInterviewAi implements InterviewAi {
           ),
       ],
       education: [for (final s in j['education'] as List) s as String],
+      language: j['language'] as String?,
+      suggestedRoles: [
+        for (final s in (j['suggestedRoles'] as List?) ?? const []) s as String,
+      ],
     );
   }
 }

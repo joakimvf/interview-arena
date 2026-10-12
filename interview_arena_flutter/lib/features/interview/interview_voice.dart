@@ -50,6 +50,10 @@ class InterviewVoice extends ChangeNotifier {
 
   String transcript = '';
 
+  /// Language to recognize, as a BCP 47 tag (e.g. sv-SE). Null means the
+  /// device default, which is why Swedish answers came out as English words.
+  String? localeId;
+
   int? _questionId;
   Uint8List? _audio;
   var _speechReady = false;
@@ -149,6 +153,7 @@ class InterviewVoice extends ChangeNotifier {
         partialResults: true,
         listenMode: ListenMode.dictation,
         autoPunctuation: true,
+        localeId: _platformLocale(localeId),
         pauseFor: const Duration(seconds: 20),
         listenFor: const Duration(minutes: 5),
       ),
@@ -209,3 +214,8 @@ class InterviewVoice extends ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Browsers take BCP 47 tags (sv-SE); iOS and Android name locales sv_SE.
+String? _platformLocale(String? tag) => tag == null || tag.isEmpty
+    ? null
+    : (kIsWeb ? tag : tag.replaceAll('-', '_'));

@@ -158,6 +158,8 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
   Widget build(BuildContext context) {
     final provider = liveInterviewProvider(widget.interviewSessionId);
     final s = ref.watch(provider);
+    // Recognize answers in the interview language (from the CV).
+    _voice.localeId = s.language;
 
     ref.listen(provider.select((s) => s.question?.questionId), (prev, next) {
       if (next == null || next == prev) return;

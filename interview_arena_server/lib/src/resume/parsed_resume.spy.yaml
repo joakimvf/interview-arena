@@ -7,3 +7,9 @@ fields:
   skills: List<ExtractedSkill>
   experience: List<WorkExperience>
   education: List<String>
+  ### BCP 47 tag of the language the CV is written in, e.g. sv-SE or en-US.
+  ### The interview is held in this language.
+  language: String?
+  ### Job titles the candidate could realistically interview for next, in the
+  ### CV's language. Shown as quick picks when starting an interview.
+  suggestedRoles: List<String>?

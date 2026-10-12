@@ -14,6 +14,7 @@ class LiveInterviewState {
     this.status = LiveStatus.connecting,
     this.targetRole,
     this.maxQuestions,
+    this.language,
     this.question,
     this.awaitingNext = false,
     this.partialScores,
@@ -29,6 +30,9 @@ class LiveInterviewState {
   final LiveStatus status;
   final String? targetRole;
   final int? maxQuestions;
+
+  /// BCP 47 tag of the interview language (from the CV), e.g. sv-SE.
+  final String? language;
 
   /// The question currently on screen.
   final QuestionAsked? question;
@@ -66,6 +70,7 @@ class LiveInterviewController extends Notifier<LiveInterviewState> {
   var _status = LiveStatus.connecting;
   String? _targetRole;
   int? _maxQuestions;
+  String? _language;
   QuestionAsked? _question;
   var _awaitingNext = false;
   InterviewScores? _partial;
@@ -97,13 +102,15 @@ class LiveInterviewController extends Notifier<LiveInterviewState> {
     return const LiveInterviewState();
   }
 
-  /// Role and question count for the header; the stream doesn't carry them.
+  /// Role, question count and language (for speech recognition); the stream
+  /// doesn't carry them.
   Future<void> _loadDetails(Client client) async {
     try {
       final s = await client.interview.getInterview(interviewSessionId);
       if (!ref.mounted || s == null) return;
       _targetRole = s.targetRole;
       _maxQuestions = s.maxQuestions;
+      _language = s.resume?.parsedData?.language;
       _emit();
     } catch (_) {
       // Header details are cosmetic; the stream reports real failures.
@@ -160,6 +167,7 @@ class LiveInterviewController extends Notifier<LiveInterviewState> {
     status: _status,
     targetRole: _targetRole,
     maxQuestions: _maxQuestions,
+    language: _language,
     question: _question,
     awaitingNext: _awaitingNext,
     partialScores: _partial,

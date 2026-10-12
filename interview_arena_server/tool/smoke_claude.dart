@@ -2,7 +2,7 @@
 // as the server's interviewAiFactory. Costs a few cents per run.
 //
 // Usage (from interview_arena_server/):
-//   ANTHROPIC_API_KEY=... dart run tool/smoke_claude.dart [path/to/resume.pdf]
+//   ANTHROPIC_API_KEY=... dart run tool/smoke_claude.dart [--parse-only] [resume.pdf]
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,6 +16,8 @@ Future<void> main(List<String> args) async {
     exit(64);
   }
   final ai = ClaudeInterviewAi(ClaudeHttpClient(apiKey: key));
+  final parseOnly = args.contains('--parse-only');
+  final files = args.where((a) => a != '--parse-only').toList();
 
   Future<T> timed<T>(String label, Future<T> Function() run) async {
     final sw = Stopwatch()..start();
@@ -26,6 +28,21 @@ Future<void> main(List<String> args) async {
 
   String json(Object? o) => const JsonEncoder.withIndent('  ').convert(o);
 
+  if (!parseOnly) await _interviewRoutes(ai, timed, json);
+
+  if (files.isNotEmpty) {
+    final pdf = await File(files.first).readAsBytes();
+    final parsed = await timed('parseResume', () => ai.parseResume(pdf));
+    stdout.writeln(json(parsed.toJson()));
+  }
+  exit(0);
+}
+
+Future<void> _interviewRoutes(
+  ClaudeInterviewAi ai,
+  Future<T> Function<T>(String, Future<T> Function()) timed,
+  String Function(Object?) json,
+) async {
   final ctx = InterviewContext(
     targetRole: 'Senior Backend Engineer',
     maxQuestions: 5,
@@ -72,11 +89,4 @@ Future<void> main(List<String> args) async {
   );
   final report = await timed('report', () => ai.report(done, eval.scores));
   stdout.writeln(json(report.toJson()));
-
-  if (args.isNotEmpty) {
-    final pdf = await File(args.first).readAsBytes();
-    final parsed = await timed('parseResume', () => ai.parseResume(pdf));
-    stdout.writeln(json(parsed.toJson()));
-  }
-  exit(0);
 }

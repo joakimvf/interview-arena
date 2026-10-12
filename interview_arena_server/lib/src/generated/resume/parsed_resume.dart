@@ -26,6 +26,8 @@ abstract class ParsedResume
     required this.skills,
     required this.experience,
     required this.education,
+    this.language,
+    this.suggestedRoles,
   });
 
   factory ParsedResume({
@@ -35,6 +37,8 @@ abstract class ParsedResume
     required List<_i0np4tum.ExtractedSkill> skills,
     required List<_ik3mkbry.WorkExperience> experience,
     required List<String> education,
+    String? language,
+    List<String>? suggestedRoles,
   }) = _ParsedResumeImpl;
 
   factory ParsedResume.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -53,6 +57,12 @@ abstract class ParsedResume
       education: _iq9nucou.Protocol().deserialize<List<String>>(
         jsonSerialization['education'],
       ),
+      language: jsonSerialization['language'] as String?,
+      suggestedRoles: jsonSerialization['suggestedRoles'] == null
+          ? null
+          : _iq9nucou.Protocol().deserialize<List<String>>(
+              jsonSerialization['suggestedRoles'],
+            ),
     );
   }
 
@@ -68,6 +78,14 @@ abstract class ParsedResume
 
   List<String> education;
 
+  /// BCP 47 tag of the language the CV is written in, e.g. sv-SE or en-US.
+  /// The interview is held in this language.
+  String? language;
+
+  /// Job titles the candidate could realistically interview for next, in the
+  /// CV's language. Shown as quick picks when starting an interview.
+  List<String>? suggestedRoles;
+
   /// Returns a shallow copy of this [ParsedResume]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -78,6 +96,8 @@ abstract class ParsedResume
     List<_i0np4tum.ExtractedSkill>? skills,
     List<_ik3mkbry.WorkExperience>? experience,
     List<String>? education,
+    String? language,
+    List<String>? suggestedRoles,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -89,6 +109,8 @@ abstract class ParsedResume
       'skills': skills.toJson(valueToJson: (v) => v.toJson()),
       'experience': experience.toJson(valueToJson: (v) => v.toJson()),
       'education': education.toJson(),
+      if (language != null) 'language': language,
+      if (suggestedRoles != null) 'suggestedRoles': suggestedRoles?.toJson(),
     };
   }
 
@@ -104,6 +126,8 @@ abstract class ParsedResume
         valueToJson: (v) => v.toJsonForProtocol(),
       ),
       'education': education.toJson(),
+      if (language != null) 'language': language,
+      if (suggestedRoles != null) 'suggestedRoles': suggestedRoles?.toJson(),
     };
   }
 
@@ -123,6 +147,8 @@ class _ParsedResumeImpl extends ParsedResume {
     required List<_i0np4tum.ExtractedSkill> skills,
     required List<_ik3mkbry.WorkExperience> experience,
     required List<String> education,
+    String? language,
+    List<String>? suggestedRoles,
   }) : super._(
          fullName: fullName,
          headline: headline,
@@ -130,6 +156,8 @@ class _ParsedResumeImpl extends ParsedResume {
          skills: skills,
          experience: experience,
          education: education,
+         language: language,
+         suggestedRoles: suggestedRoles,
        );
 
   /// Returns a shallow copy of this [ParsedResume]
@@ -143,6 +171,8 @@ class _ParsedResumeImpl extends ParsedResume {
     List<_i0np4tum.ExtractedSkill>? skills,
     List<_ik3mkbry.WorkExperience>? experience,
     List<String>? education,
+    Object? language = _Undefined,
+    Object? suggestedRoles = _Undefined,
   }) {
     return ParsedResume(
       fullName: fullName is String? ? fullName : this.fullName,
@@ -154,6 +184,10 @@ class _ParsedResumeImpl extends ParsedResume {
       experience:
           experience ?? this.experience.map((e0) => e0.copyWith()).toList(),
       education: education ?? this.education.map((e0) => e0).toList(),
+      language: language is String? ? language : this.language,
+      suggestedRoles: suggestedRoles is List<String>?
+          ? suggestedRoles
+          : this.suggestedRoles?.map((e0) => e0).toList(),
     );
   }
 }
