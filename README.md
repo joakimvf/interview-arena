@@ -30,7 +30,7 @@ When it's over you get an overall score, what went well, what to improve and top
 
 ### Multiple languages
 
-The interview follows the language of your CV. Claude detects it when it parses the CV and runs the whole interview in that language, ElevenLabs speaks the questions in it, and speech-to-text listens in it too, so your answers come out in the right language. The feedback and suggested roles follow along. We've tried it with English, Swedish and Spanish.
+The interview follows the language of your CV. Claude detects it when it parses the CV and runs the whole interview in that language, ElevenLabs speaks the questions in it, and speech-to-text listens in it too, so your answers come out in the right language. The feedback and suggested roles follow along. We've tried it with English, Swedish and Spanish. Other languages should work as long as your browser's speech recognition and ElevenLabs support them, but we haven't tested them.
 
 ## How we use Serverpod
 
