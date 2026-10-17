@@ -1,0 +1,150 @@
+{
+  "__className__": "serverpod.DatabaseMigration",
+  "actions": [
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "deleteTable",
+      "deleteTable": "skill_profile"
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "deleteTable",
+      "deleteTable": "challenge"
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "deleteTable",
+      "deleteTable": "candidate_profile"
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationAction",
+      "type": "alterTable",
+      "alterTable": {
+        "__className__": "serverpod.TableMigration",
+        "name": "answer",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [
+          "authUserId",
+          "embedding",
+          "embeddingModel"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [
+          "answer_user_created_idx",
+          "answer_embedding_hnsw_idx"
+        ],
+        "addForeignKeys": [
+          {
+            "__className__": "serverpod.ForeignKeyDefinition",
+            "constraintName": "answer_fk_0",
+            "columns": [
+              "questionId"
+            ],
+            "referenceTable": "question",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 4
+          }
+        ],
+        "deleteForeignKeys": [
+          "answer_fk_1",
+          "answer_fk_0"
+        ],
+        "warnings": [
+          {
+            "__className__": "serverpod.DatabaseMigrationWarning",
+            "type": "columnDropped",
+            "message": "Column \"authUserId\" of table \"answer\" will be dropped.",
+            "table": "answer",
+            "columns": [
+              "authUserId"
+            ],
+            "destrucive": true
+          },
+          {
+            "__className__": "serverpod.DatabaseMigrationWarning",
+            "type": "columnDropped",
+            "message": "Column \"embedding\" of table \"answer\" will be dropped.",
+            "table": "answer",
+            "columns": [
+              "embedding"
+            ],
+            "destrucive": true
+          },
+          {
+            "__className__": "serverpod.DatabaseMigrationWarning",
+            "type": "columnDropped",
+            "message": "Column \"embeddingModel\" of table \"answer\" will be dropped.",
+            "table": "answer",
+            "columns": [
+              "embeddingModel"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "tableDropped",
+      "message": "Table \"skill_profile\" will be dropped.",
+      "table": "skill_profile",
+      "columns": [],
+      "destrucive": true
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "tableDropped",
+      "message": "Table \"challenge\" will be dropped.",
+      "table": "challenge",
+      "columns": [],
+      "destrucive": true
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "tableDropped",
+      "message": "Table \"candidate_profile\" will be dropped.",
+      "table": "candidate_profile",
+      "columns": [],
+      "destrucive": true
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "columnDropped",
+      "message": "Column \"authUserId\" of table \"answer\" will be dropped.",
+      "table": "answer",
+      "columns": [
+        "authUserId"
+      ],
+      "destrucive": true
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "columnDropped",
+      "message": "Column \"embedding\" of table \"answer\" will be dropped.",
+      "table": "answer",
+      "columns": [
+        "embedding"
+      ],
+      "destrucive": true
+    },
+    {
+      "__className__": "serverpod.DatabaseMigrationWarning",
+      "type": "columnDropped",
+      "message": "Column \"embeddingModel\" of table \"answer\" will be dropped.",
+      "table": "answer",
+      "columns": [
+        "embeddingModel"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}
