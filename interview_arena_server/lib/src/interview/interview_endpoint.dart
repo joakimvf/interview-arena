@@ -120,6 +120,8 @@ class InterviewEndpoint extends Endpoint {
     var aggregate = interview.scores;
     var sequence = 0;
     var finished = false;
+    // Off until the client says otherwise (VoiceModeChanged).
+    var voiceMode = false;
 
     // Safety net; on a client cancel the after-loop code runs first (spike B).
     session.addWillCloseListener((s) async {
@@ -166,13 +168,11 @@ class InterviewEndpoint extends Endpoint {
           isFollowUp: g.isFollowUp,
         ),
       );
-      final previous = questions.isEmpty ? null : questions.last;
       questions.add(q);
       // In voice mode, start synthesizing the spoken question now; the
-      // client's questionAudio request then usually finds it ready. Skipped
-      // when the client didn't ask for the previous question's audio (typing
-      // mode), so typed interviews spend no voice credits.
-      if (previous != null && VoiceEndpoint.audioWasRequested(previous.id!)) {
+      // client's questionAudio request then finds it ready. Typed interviews
+      // never call ElevenLabs.
+      if (voiceMode) {
         unawaited(
           VoiceEndpoint.audioFor(session, q).then(
             (_) {},
@@ -375,6 +375,12 @@ class InterviewEndpoint extends Endpoint {
             yield await finish();
             return; // completes the output: client gets onDone
           }
+
+        case VoiceModeChanged(:final enabled):
+          // Applies from the next question: the current one is either already
+          // being fetched by the client (start of the interview) or isn't
+          // played at all (switching to voice mid-answer keeps the answer).
+          voiceMode = enabled;
 
         case EndInterview():
           yield await finish();

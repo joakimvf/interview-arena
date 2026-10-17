@@ -240,58 +240,74 @@ void main() {
       unawaited(inputs.close());
     });
 
-    test('when the client never asks for question audio (typing mode) then '
-        'the next question is not synthesized, and in voice mode it is '
-        'prefetched', () async {
-      final tts = _CountingSynthesizer();
-      speechSynthesizerFactory = (_) => tts;
-      final interview = await endpoints.interview.start(
-        authed,
-        'Backend',
-        null,
-      );
-      final inputs = StreamController<CandidateInput>();
-      final received = <InterviewEvent>[];
-      final sub = endpoints.interview
-          .conduct(authed, interview.id!, inputs.stream)
-          .listen(received.add);
-      Future<QuestionAsked> answerAndWaitForNext(int seq) async {
-        final asked = received.whereType<QuestionAsked>();
-        final count = asked.length;
-        inputs.add(
-          AnswerSubmitted(
-            clientSeq: seq,
-            questionId: asked.last.questionId,
-            transcript: 'answer $seq',
-          ),
+    test(
+      'when the client switches between typing and voice then only '
+      'voice-mode questions are synthesized, from the next question on',
+      () async {
+        final tts = _CountingSynthesizer();
+        speechSynthesizerFactory = (_) => tts;
+        final interview = await endpoints.interview.start(
+          authed,
+          'Backend',
+          null,
         );
-        await waitFor(() => asked.length == count + 1);
-        return asked.last;
-      }
+        await InterviewSession.db.updateById(
+          sb.build(),
+          interview.id!,
+          columnValues: (t) => [t.maxQuestions(5)],
+        );
+        final inputs = StreamController<CandidateInput>();
+        final received = <InterviewEvent>[];
+        final sub = endpoints.interview
+            .conduct(authed, interview.id!, inputs.stream)
+            .listen(received.add);
+        var seq = 0;
+        Future<QuestionAsked> answerAndWaitForNext() async {
+          final asked = received.whereType<QuestionAsked>();
+          final count = asked.length;
+          inputs.add(
+            AnswerSubmitted(
+              clientSeq: seq++,
+              questionId: asked.last.questionId,
+              transcript: 'answer $seq',
+            ),
+          );
+          await waitFor(() => asked.length == count + 1);
+          return asked.last;
+        }
 
-      await waitFor(() => received.whereType<QuestionAsked>().isNotEmpty);
-      final q2 = await answerAndWaitForNext(1); // typing: no audio for Q1
-      expect(tts.calls, 0);
+        void setVoice(bool enabled) =>
+            inputs.add(VoiceModeChanged(clientSeq: seq++, enabled: enabled));
 
-      await endpoints.voice.questionAudio(authed, q2.questionId); // voice on
-      expect(tts.calls, 1);
-      final q3 = await answerAndWaitForNext(2);
-      await waitFor(() => tts.calls == 2); // Q3 prefetched
-      await endpoints.voice.questionAudio(authed, q3.questionId);
-      expect(tts.calls, 2); // served from the prefetch
+        await waitFor(() => received.whereType<QuestionAsked>().isNotEmpty);
+        setVoice(false); // begins typing
+        await answerAndWaitForNext(); // Q2
+        expect(tts.calls, 0);
 
-      final voiceRows = await AiUsage.db.find(
-        sb.build(),
-        where: (t) =>
-            t.feature.equals('voice') &
-            t.interviewSessionId.equals(interview.id),
-      );
-      expect(voiceRows, hasLength(2)); // one per synthesis, not per request
-      expect(voiceRows.first.model, 'fake-voice');
-      expect(voiceRows.first.characters, greaterThan(0));
-      await sub.cancel();
-      unawaited(inputs.close());
-    });
+        setVoice(true); // switches to voice while answering Q2
+        final q3 = await answerAndWaitForNext();
+        await waitFor(() => tts.calls == 1); // Q3 prefetched, Q2 left alone
+        await endpoints.voice.questionAudio(authed, q3.questionId);
+        expect(tts.calls, 1); // served from the prefetch
+
+        setVoice(false); // back to typing: Q4 is not synthesized at all
+        await answerAndWaitForNext();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        expect(tts.calls, 1);
+
+        final voiceRows = await AiUsage.db.find(
+          sb.build(),
+          where: (t) =>
+              t.feature.equals('voice') &
+              t.interviewSessionId.equals(interview.id),
+        );
+        expect(voiceRows, hasLength(1)); // one per synthesis, not per request
+        expect(voiceRows.single.model, 'fake-voice');
+        expect(voiceRows.single.characters, greaterThan(0));
+        await sub.cancel();
+        unawaited(inputs.close());
+      },
+    );
 
     test('when an auth user is deleted then all owned rows cascade and a '
         'deleted resume nulls interview_session.resumeId', () async {

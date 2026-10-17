@@ -150,6 +150,9 @@ class Protocol extends _isc.SerializationManager {
     if (t == _ipbu4009.EndInterview) {
       return _ipbu4009.EndInterview.fromJson(data) as T;
     }
+    if (t == _ipbu4009.VoiceModeChanged) {
+      return _ipbu4009.VoiceModeChanged.fromJson(data) as T;
+    }
     if (t == _ix0gec48.InterviewAccessException) {
       return _ix0gec48.InterviewAccessException.fromJson(data) as T;
     }
@@ -254,6 +257,10 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _isc.getType<_ipbu4009.EndInterview?>()) {
       return (data != null ? _ipbu4009.EndInterview.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ipbu4009.VoiceModeChanged?>()) {
+      return (data != null ? _ipbu4009.VoiceModeChanged.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_ix0gec48.InterviewAccessException?>()) {
       return (data != null
@@ -410,6 +417,7 @@ class Protocol extends _isc.SerializationManager {
       _ipbu4009.AnswerChunk => 'AnswerChunk',
       _ipbu4009.AnswerSubmitted => 'AnswerSubmitted',
       _ipbu4009.EndInterview => 'EndInterview',
+      _ipbu4009.VoiceModeChanged => 'VoiceModeChanged',
       _ix0gec48.InterviewAccessException => 'InterviewAccessException',
       _ihpfwdr6.InterviewReport => 'InterviewReport',
       _i0s2zm9r.InterviewScores => 'InterviewScores',
@@ -473,6 +481,8 @@ class Protocol extends _isc.SerializationManager {
         return 'AnswerSubmitted';
       case _ipbu4009.EndInterview():
         return 'EndInterview';
+      case _ipbu4009.VoiceModeChanged():
+        return 'VoiceModeChanged';
       case _ix0gec48.InterviewAccessException():
         return 'InterviewAccessException';
       case _ihpfwdr6.InterviewReport():
@@ -570,6 +580,9 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'EndInterview') {
       return deserialize<_ipbu4009.EndInterview>(data['data']);
+    }
+    if (dataClassName == 'VoiceModeChanged') {
+      return deserialize<_ipbu4009.VoiceModeChanged>(data['data']);
     }
     if (dataClassName == 'InterviewAccessException') {
       return deserialize<_ix0gec48.InterviewAccessException>(data['data']);
