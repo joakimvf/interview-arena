@@ -8,24 +8,32 @@ import 'package:serverpod_auth_idp_server/providers/email.dart';
 bool Function(Session session) signUpOpen = (session) =>
     const {'development', 'test'}.contains(session.serverpod.runMode);
 
-/// Makes sure an email login for [email] exists with [password] (no
-/// verification email): creates it, or resets the password of an existing
-/// one so the configured password always wins. Returns whether it created
-/// the account.
+/// Makes sure an email login for [email] exists with [password] and
+/// [scopes] (no verification email): creates it, or resets the password and
+/// scopes of an existing one so the configuration always wins. Returns
+/// whether it created the account.
 Future<bool> ensureEmailAccount(
   Session session, {
   required String email,
   required String password,
+  Set<Scope> scopes = const {},
 }) async {
   final normalized = email.trim().toLowerCase();
   final admin = AuthServices.instance.emailIdp.admin;
-  if (await admin.findAccount(session, email: normalized) != null) {
+  final existing = await admin.findAccount(session, email: normalized);
+  if (existing != null) {
     await admin.setPassword(session, email: normalized, password: password);
+    await AuthServices.instance.authUsers.update(
+      session,
+      authUserId: existing.authUserId,
+      scopes: scopes,
+    );
     return false;
   }
   await session.db.transaction((transaction) async {
     final user = await AuthServices.instance.authUsers.create(
       session,
+      scopes: scopes,
       transaction: transaction,
     );
     await admin.createEmailAuthentication(
@@ -41,8 +49,9 @@ Future<bool> ensureEmailAccount(
 
 /// The pre-made accounts, since sign-up is closed on deployed servers. Each
 /// one is configured by the `<name>Email` and `<name>Password` passwords in
-/// Serverpod Cloud (never committed): `admin` for the team's own testing,
-/// `jury` for the judges.
+/// Serverpod Cloud (never committed): `admin` for the team's own testing
+/// (it gets the admin scope, which opens the AI cost screen), `jury` for the
+/// judges.
 const configuredAccounts = ['admin', 'jury'];
 
 /// At server start, creates each configured account or resets its password
@@ -64,6 +73,7 @@ Future<void> createConfiguredAccounts(Serverpod pod) async {
           session,
           email: email,
           password: password,
+          scopes: name == 'admin' ? {Scope.admin} : const {},
         );
         session.log(
           created

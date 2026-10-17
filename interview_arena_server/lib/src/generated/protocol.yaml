@@ -9,6 +9,9 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+aiCost:
+  - canView:
+  - summary:
 interview:
   - start:
   - getInterview:

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/client_providers.dart';
 import '../../core/data_providers.dart';
+import '../costs/ai_costs_screen.dart';
 import '../interview/interview_history.dart';
 import '../interview/start_interview_card.dart';
 import '../resume/resume_card.dart';
@@ -17,6 +19,12 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Interview Arena'),
         actions: [
+          if (ref.watch(canViewAiCostsProvider).value ?? false)
+            IconButton(
+              tooltip: 'AI costs',
+              icon: const Icon(Icons.payments_outlined),
+              onPressed: () => context.go('/costs'),
+            ),
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout),

@@ -21,6 +21,10 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'auth/sign_up_closed_exception.dart' as _i8uejmxn;
+import 'costs/ai_cost_exception.dart' as _ihqm99my;
+import 'costs/ai_cost_line.dart' as _is9tm0e4;
+import 'costs/ai_cost_summary.dart' as _i061j709;
+import 'costs/ai_interview_cost.dart' as _icpn43qs;
 import 'interview/answer.dart' as _ilptq4di;
 import 'interview/answer_feedback.dart' as _iq8f7lpk;
 import 'interview/events/interview_event.dart' as _i9r9cihw;
@@ -40,6 +44,10 @@ import 'resume/resume_parse_status.dart' as _imejjlr6;
 import 'resume/resume_upload_ticket.dart' as _ieef7w2g;
 import 'resume/work_experience.dart' as _iq8k1g78;
 export 'auth/sign_up_closed_exception.dart';
+export 'costs/ai_cost_exception.dart';
+export 'costs/ai_cost_line.dart';
+export 'costs/ai_cost_summary.dart';
+export 'costs/ai_interview_cost.dart';
 export 'interview/answer.dart';
 export 'interview/answer_feedback.dart';
 export 'interview/events/interview_event.dart';
@@ -96,6 +104,18 @@ class Protocol extends _isc.SerializationManager {
 
     if (t == _i8uejmxn.SignUpClosedException) {
       return _i8uejmxn.SignUpClosedException.fromJson(data) as T;
+    }
+    if (t == _ihqm99my.AiCostAccessException) {
+      return _ihqm99my.AiCostAccessException.fromJson(data) as T;
+    }
+    if (t == _is9tm0e4.AiCostLine) {
+      return _is9tm0e4.AiCostLine.fromJson(data) as T;
+    }
+    if (t == _i061j709.AiCostSummary) {
+      return _i061j709.AiCostSummary.fromJson(data) as T;
+    }
+    if (t == _icpn43qs.AiInterviewCost) {
+      return _icpn43qs.AiInterviewCost.fromJson(data) as T;
     }
     if (t == _ilptq4di.Answer) {
       return _ilptq4di.Answer.fromJson(data) as T;
@@ -176,6 +196,23 @@ class Protocol extends _isc.SerializationManager {
       return (data != null
               ? _i8uejmxn.SignUpClosedException.fromJson(data)
               : null)
+          as T;
+    }
+    if (t == _isc.getType<_ihqm99my.AiCostAccessException?>()) {
+      return (data != null
+              ? _ihqm99my.AiCostAccessException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_is9tm0e4.AiCostLine?>()) {
+      return (data != null ? _is9tm0e4.AiCostLine.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i061j709.AiCostSummary?>()) {
+      return (data != null ? _i061j709.AiCostSummary.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_icpn43qs.AiInterviewCost?>()) {
+      return (data != null ? _icpn43qs.AiInterviewCost.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_ilptq4di.Answer?>()) {
@@ -273,6 +310,18 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _iq8k1g78.WorkExperience.fromJson(data) : null)
           as T;
     }
+    if (t == List<_is9tm0e4.AiCostLine>) {
+      return (data as List)
+              .map((e) => deserialize<_is9tm0e4.AiCostLine>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_icpn43qs.AiInterviewCost>) {
+      return (data as List)
+              .map((e) => deserialize<_icpn43qs.AiInterviewCost>(e))
+              .toList()
+          as T;
+    }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
@@ -346,6 +395,10 @@ class Protocol extends _isc.SerializationManager {
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i8uejmxn.SignUpClosedException => 'SignUpClosedException',
+      _ihqm99my.AiCostAccessException => 'AiCostAccessException',
+      _is9tm0e4.AiCostLine => 'AiCostLine',
+      _i061j709.AiCostSummary => 'AiCostSummary',
+      _icpn43qs.AiInterviewCost => 'AiInterviewCost',
       _ilptq4di.Answer => 'Answer',
       _iq8f7lpk.AnswerFeedback => 'AnswerFeedback',
       _i9r9cihw.AnswerEvaluated => 'AnswerEvaluated',
@@ -390,6 +443,14 @@ class Protocol extends _isc.SerializationManager {
     switch (data) {
       case _i8uejmxn.SignUpClosedException():
         return 'SignUpClosedException';
+      case _ihqm99my.AiCostAccessException():
+        return 'AiCostAccessException';
+      case _is9tm0e4.AiCostLine():
+        return 'AiCostLine';
+      case _i061j709.AiCostSummary():
+        return 'AiCostSummary';
+      case _icpn43qs.AiInterviewCost():
+        return 'AiInterviewCost';
       case _ilptq4di.Answer():
         return 'Answer';
       case _iq8f7lpk.AnswerFeedback():
@@ -464,6 +525,18 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'SignUpClosedException') {
       return deserialize<_i8uejmxn.SignUpClosedException>(data['data']);
+    }
+    if (dataClassName == 'AiCostAccessException') {
+      return deserialize<_ihqm99my.AiCostAccessException>(data['data']);
+    }
+    if (dataClassName == 'AiCostLine') {
+      return deserialize<_is9tm0e4.AiCostLine>(data['data']);
+    }
+    if (dataClassName == 'AiCostSummary') {
+      return deserialize<_i061j709.AiCostSummary>(data['data']);
+    }
+    if (dataClassName == 'AiInterviewCost') {
+      return deserialize<_icpn43qs.AiInterviewCost>(data['data']);
     }
     if (dataClassName == 'Answer') {
       return deserialize<_ilptq4di.Answer>(data['data']);

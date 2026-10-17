@@ -17,6 +17,9 @@ config/passwords.yaml
 # Firebase service account key for Firebase auth
 config/firebase_service_account_key.json
 
+# Google sign-in client secret
+config/google_client_secret.json
+
 # Embedded PostgreSQL runtime artifacts (data dir, sockets, pidfiles)
 .serverpod/
 

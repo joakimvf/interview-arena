@@ -29,7 +29,7 @@ void main() {
 
     setUp(() async {
       fake = FakeInterviewAi();
-      interviewAiFactory = (_) => fake;
+      interviewAiFactory = (_, [_]) => fake;
       InterviewEndpoint.partialScoreInterval = Duration.zero;
       InterviewEndpoint.minNewPartialChars = 120;
       speechSynthesizerFactory = (_) => null;
@@ -279,6 +279,16 @@ void main() {
       await waitFor(() => tts.calls == 2); // Q3 prefetched
       await endpoints.voice.questionAudio(authed, q3.questionId);
       expect(tts.calls, 2); // served from the prefetch
+
+      final voiceRows = await AiUsage.db.find(
+        sb.build(),
+        where: (t) =>
+            t.feature.equals('voice') &
+            t.interviewSessionId.equals(interview.id),
+      );
+      expect(voiceRows, hasLength(2)); // one per synthesis, not per request
+      expect(voiceRows.first.model, 'fake-voice');
+      expect(voiceRows.first.characters, greaterThan(0));
       await sub.cancel();
       unawaited(inputs.close());
     });
@@ -330,6 +340,8 @@ void main() {
 
 class _CountingSynthesizer implements SpeechSynthesizer {
   int calls = 0;
+  @override
+  String get modelId => 'fake-voice';
   @override
   Future<Uint8List> synthesize(String text) async {
     calls++;

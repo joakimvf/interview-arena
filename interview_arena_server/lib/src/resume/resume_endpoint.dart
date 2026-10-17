@@ -125,7 +125,11 @@ class ResumeEndpoint extends Endpoint {
     final resume = await Resume.db.findById(session, resumeId);
     if (resume == null || resume.status != ResumeParseStatus.parsing) return;
     try {
-      final parsed = await interviewAiFactory(session).parseResume(pdf);
+      final parsed = await interviewAiFactory(session, (
+        authUserId: resume.authUserId,
+        interviewSessionId: null,
+        resumeId: resumeId,
+      )).parseResume(pdf);
       await Resume.db.updateRow(
         session,
         resume.copyWith(

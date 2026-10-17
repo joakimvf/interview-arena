@@ -18,5 +18,25 @@ pubspec_overrides.yaml
 # Serverpod Cloud CLI
 .scloud/
 
-# macOS
+# IDEs (the shared .vscode/launch.json and tasks.json stay tracked)
+.idea/
+*.iml
+*.ipr
+*.iws
+.fleet/
+.zed/
+
+# Secrets that must never be committed (API keys go in the gitignored
+# config/passwords.yaml, or in Serverpod Cloud passwords)
+.env
+.env.*
+!.env.example
+
+# Test coverage and logs
+coverage/
+*.log
+
+# OS files
 .DS_Store
+Thumbs.db
+desktop.ini

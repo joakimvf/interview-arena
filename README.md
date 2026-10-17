@@ -51,6 +51,8 @@ The whole backend is Serverpod 4, hosted on Serverpod Cloud.
   - `claude-haiku-5-5` gives the live scores while you answer (cheap and fast, since it runs every few seconds) and parses the CV.
 - **ElevenLabs** (`eleven_v4_turbo`) is the interviewer's voice. The server calls it, so the key never reaches the app, and only in voice mode.
 - **Speech-to-text** runs in the browser/OS through the `speech_to_text` package.
+
+Every Claude response and voice synthesis is recorded with its token usage and estimated cost. The admin account sees the totals (by feature, model, day and interview) on an AI costs screen in the app.
 - **Claude Code** helped us build it, as our AI coding assistant.
 
 ## Run it yourself

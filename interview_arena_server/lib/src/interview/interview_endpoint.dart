@@ -107,7 +107,11 @@ class InterviewEndpoint extends Endpoint {
       columnValues: (t) => [t.status(InterviewStatus.active)],
     );
 
-    final ai = interviewAiFactory(session);
+    final ai = interviewAiFactory(session, (
+      authUserId: authUserId,
+      interviewSessionId: id,
+      resumeId: interview.resumeId,
+    ));
     final questions = <Question>[...?interview.questions];
     final answered = <int, Answer>{
       for (final q in questions)

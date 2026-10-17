@@ -62,7 +62,7 @@ void main() {
 
       setUp(() {
         fake = FakeInterviewAi();
-        interviewAiFactory = (_) => fake;
+        interviewAiFactory = (_, [_]) => fake;
         InterviewEndpoint.partialScoreInterval = Duration.zero;
         client = c.Client('http://localhost:${Serverpod.instance.server.port}/')
           ..authKeyProvider = _FixedKey();

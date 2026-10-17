@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:interview_arena_server/src/ai/anthropic_client.dart';
 import 'package:interview_arena_server/src/ai/interview_ai.dart';
+import 'package:interview_arena_server/src/costs/pricing.dart';
 
 Future<void> main(List<String> args) async {
   final key = Platform.environment['ANTHROPIC_API_KEY'];
@@ -17,13 +18,24 @@ Future<void> main(List<String> args) async {
   }
   final ai = ClaudeInterviewAi(
     ClaudeHttpClient(apiKey: key),
-    // Same line the server logs per response.
-    onUsage: (route, model, usage) => stdout.writeln(
-      'claude ${route.name} model=$model '
-      'in=${usage['input_tokens']} out=${usage['output_tokens']} '
-      'cacheRead=${usage['cache_read_input_tokens'] ?? 0} '
-      'cacheWrite=${usage['cache_creation_input_tokens'] ?? 0}',
-    ),
+    // Like the line the server logs per response.
+    onUsage: (route, model, usage) {
+      int tokens(String key) => (usage[key] as num?)?.toInt() ?? 0;
+      final cost = claudeCostUsd(
+        model,
+        inputTokens: tokens('input_tokens'),
+        outputTokens: tokens('output_tokens'),
+        cacheReadTokens: tokens('cache_read_input_tokens'),
+        cacheWriteTokens: tokens('cache_creation_input_tokens'),
+      );
+      stdout.writeln(
+        'ai ${route.name} model=$model '
+        'in=${tokens('input_tokens')} out=${tokens('output_tokens')} '
+        'cacheRead=${tokens('cache_read_input_tokens')} '
+        'cacheWrite=${tokens('cache_creation_input_tokens')} '
+        'cost=${cost == null ? 'unknown' : '\$${cost.toStringAsFixed(6)}'}',
+      );
+    },
   );
   final parseOnly = args.contains('--parse-only');
   final files = args.where((a) => a != '--parse-only').toList();

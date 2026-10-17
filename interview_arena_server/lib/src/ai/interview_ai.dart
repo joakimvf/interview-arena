@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'dart:async';
+
 import 'package:serverpod/serverpod.dart';
 
+import '../costs/ai_usage_tracker.dart';
 import '../generated/protocol.dart';
 import 'anthropic_client.dart';
 
@@ -69,19 +72,22 @@ abstract interface class InterviewAi {
 
 /// Overridable in tests (same isolate as withServerpod's in-process server).
 /// Endpoints are constructed by generated code, so there is no constructor
-/// injection.
-InterviewAi Function(Session session) interviewAiFactory = (session) {
+/// injection. [context] says what the calls are for, so their cost is
+/// recorded against it in `ai_usage`.
+InterviewAi Function(Session session, [AiUsageContext? context])
+interviewAiFactory = (session, [context]) {
   final key = session.passwords['anthropicApiKey'];
   if (key == null || key.isEmpty) {
     throw AiUnavailableException('not_configured', 'anthropicApiKey missing');
   }
   return ClaudeInterviewAi(
     ClaudeHttpClient(apiKey: key),
-    onUsage: (route, model, usage) => session.log(
-      'claude ${route.name} model=$model '
-      'in=${usage['input_tokens']} out=${usage['output_tokens']} '
-      'cacheRead=${usage['cache_read_input_tokens'] ?? 0} '
-      'cacheWrite=${usage['cache_creation_input_tokens'] ?? 0}',
+    onUsage: (route, model, usage) => AiUsageTracker.recordClaude(
+      session,
+      feature: route.name,
+      model: model,
+      usage: usage,
+      context: context,
     ),
   );
 };
@@ -110,7 +116,11 @@ class ClaudeRoute {
 
 /// Called after every Claude response with its `usage` block.
 typedef ClaudeUsageListener =
-    void Function(ClaudeRoute route, String model, Map<String, dynamic> usage);
+    FutureOr<void> Function(
+      ClaudeRoute route,
+      String model,
+      Map<String, dynamic> usage,
+    );
 
 class ClaudeInterviewAi implements InterviewAi {
   ClaudeInterviewAi(this._api, {this.onUsage});
@@ -341,7 +351,7 @@ class ClaudeInterviewAi implements InterviewAi {
       extraBetas: r.serverFallback ? const [fallbackBeta] : const [],
     );
     if (m['usage'] case final Map usage) {
-      onUsage?.call(
+      await onUsage?.call(
         r,
         m['model'] as String? ?? r.model,
         Map<String, dynamic>.from(usage),

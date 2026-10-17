@@ -19,6 +19,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../costs/ai_cost_endpoint.dart' as _iecgnbmm;
 import '../interview/interview_endpoint.dart' as _ihytjpn7;
 import '../interview/voice_endpoint.dart' as _iuhx5coh;
 import '../resume/resume_endpoint.dart' as _ii1d9ztk;
@@ -37,6 +38,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'jwtRefresh',
+          null,
+        ),
+      'aiCost': _iecgnbmm.AiCostEndpoint()
+        ..initialize(
+          server,
+          'aiCost',
           null,
         ),
       'interview': _ihytjpn7.InterviewEndpoint()
@@ -261,6 +268,41 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         refreshToken: params['refreshToken'],
                       ),
+        ),
+      },
+    );
+    connectors['aiCost'] = _is.EndpointConnector(
+      name: 'aiCost',
+      endpoint: endpoints['aiCost']!,
+      methodConnectors: {
+        'canView': _is.MethodConnector(
+          name: 'canView',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['aiCost'] as _iecgnbmm.AiCostEndpoint)
+                  .canView(session),
+        ),
+        'summary': _is.MethodConnector(
+          name: 'summary',
+          params: {
+            'days': _is.ParameterDescription(
+              name: 'days',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['aiCost'] as _iecgnbmm.AiCostEndpoint).summary(
+                    session,
+                    params['days'],
+                  ),
         ),
       },
     );
