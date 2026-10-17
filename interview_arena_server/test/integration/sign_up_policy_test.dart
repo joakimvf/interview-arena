@@ -1,6 +1,5 @@
 import 'package:interview_arena_server/src/auth/sign_up_policy.dart';
 import 'package:interview_arena_server/src/generated/protocol.dart';
-import 'package:interview_arena_server/src/profile/profile_hooks.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'package:test/test.dart';
@@ -31,9 +30,6 @@ void main() {
           identityProviderBuilders: [
             EmailIdpConfig(secretHashPepper: 'test-email-pepper'),
           ],
-          authUsersConfig: const AuthUsersConfig(
-            onAfterAuthUserCreated: createCandidateProfile,
-          ),
         );
       });
 
@@ -50,8 +46,8 @@ void main() {
       });
 
       test(
-        'when the jury account is ensured then the jury can log in, has a '
-        'profile, and a later run with a new password replaces the old one',
+        'when the jury account is ensured then the jury can log in, and a '
+        'later run with a new password replaces the old one',
         () async {
           final session = sessionBuilder.build();
           expect(
@@ -76,11 +72,7 @@ void main() {
             email: 'jury@example.com',
             password: 'new-jury-password-456',
           );
-          final profiles = await CandidateProfile.db.find(
-            session,
-            where: (t) => t.authUserId.equals(auth.authUserId),
-          );
-          expect(profiles, hasLength(1));
+          expect(auth.authUserId, isNotNull);
 
           // The old password no longer works.
           await expectLater(

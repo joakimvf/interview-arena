@@ -1,7 +1,5 @@
-import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:interview_arena_server/src/ai/embeddings.dart';
 import 'package:interview_arena_server/src/ai/interview_ai.dart';
 import 'package:interview_arena_server/src/generated/protocol.dart';
 
@@ -49,7 +47,6 @@ class FakeInterviewAi implements InterviewAi {
         summary: 'ok',
         strengths: ['clear'],
         improvements: ['depth'],
-        skillDeltas: {'Dart': -15},
       ),
     );
   }
@@ -81,29 +78,5 @@ class FakeInterviewAi implements InterviewAi {
       ],
       education: ['BSc'],
     );
-  }
-}
-
-/// Unit vector along a fixed direction plus a small seeded perturbation.
-List<double> fakeVector(int seed) {
-  final r = Random(seed);
-  final v = [
-    for (var i = 0; i < embeddingDimension; i++) 1 + r.nextDouble() * 0.01,
-  ];
-  final n = sqrt(v.fold<double>(0, (s, x) => s + x * x));
-  return [for (final x in v) x / n];
-}
-
-class FakeEmbedder implements EmbeddingClient {
-  int calls = 0;
-  @override
-  String get modelId => 'fake-embed';
-  @override
-  Future<List<List<double>>> embed(
-    List<String> texts, {
-    required bool isQuery,
-  }) async {
-    calls++;
-    return [for (var i = 0; i < texts.length; i++) fakeVector(i)];
   }
 }

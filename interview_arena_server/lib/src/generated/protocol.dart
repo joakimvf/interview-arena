@@ -22,12 +22,11 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 import 'auth/sign_up_closed_exception.dart' as _i8uejmxn;
-import 'challenges/challenge.dart' as _iylq4q0i;
-import 'challenges/challenge_difficulty.dart' as _igs032ca;
-import 'future_calls_generated_models/answer_embedding_future_call_embed_model.dart'
-    as _ir28uvix;
-import 'future_calls_generated_models/resume_parse_future_call_parse_model.dart'
-    as _ifd0qwzd;
+import 'costs/ai_cost_exception.dart' as _ihqm99my;
+import 'costs/ai_cost_line.dart' as _is9tm0e4;
+import 'costs/ai_cost_summary.dart' as _i061j709;
+import 'costs/ai_interview_cost.dart' as _icpn43qs;
+import 'costs/ai_usage.dart' as _i6v27zmd;
 import 'interview/answer.dart' as _ilptq4di;
 import 'interview/answer_feedback.dart' as _iq8f7lpk;
 import 'interview/events/interview_event.dart' as _i9r9cihw;
@@ -39,7 +38,6 @@ import 'interview/interview_session.dart' as _illbuy7a;
 import 'interview/interview_status.dart' as _ifyqp54v;
 import 'interview/question.dart' as _ihpdvrxq;
 import 'interview/question_category.dart' as _i8405n7p;
-import 'profile/candidate_profile.dart' as _i4trz3o8;
 import 'resume/extracted_skill.dart' as _izdd6kyx;
 import 'resume/parsed_resume.dart' as _ivs53uxk;
 import 'resume/resume.dart' as _ipkmgecw;
@@ -47,12 +45,12 @@ import 'resume/resume_exception.dart' as _iqo5w92k;
 import 'resume/resume_parse_status.dart' as _imejjlr6;
 import 'resume/resume_upload_ticket.dart' as _ieef7w2g;
 import 'resume/work_experience.dart' as _iq8k1g78;
-import 'skills/skill_node.dart' as _ifilxtcy;
-import 'skills/skill_profile.dart' as _ioq46cla;
-import 'skills/weakness.dart' as _i7w5oxf5;
 export 'auth/sign_up_closed_exception.dart';
-export 'challenges/challenge.dart';
-export 'challenges/challenge_difficulty.dart';
+export 'costs/ai_cost_exception.dart';
+export 'costs/ai_cost_line.dart';
+export 'costs/ai_cost_summary.dart';
+export 'costs/ai_interview_cost.dart';
+export 'costs/ai_usage.dart';
 export 'interview/answer.dart';
 export 'interview/answer_feedback.dart';
 export 'interview/events/interview_event.dart';
@@ -64,7 +62,6 @@ export 'interview/interview_session.dart';
 export 'interview/interview_status.dart';
 export 'interview/question.dart';
 export 'interview/question_category.dart';
-export 'profile/candidate_profile.dart';
 export 'resume/extracted_skill.dart';
 export 'resume/parsed_resume.dart';
 export 'resume/resume.dart';
@@ -72,9 +69,6 @@ export 'resume/resume_exception.dart';
 export 'resume/resume_parse_status.dart';
 export 'resume/resume_upload_ticket.dart';
 export 'resume/work_experience.dart';
-export 'skills/skill_node.dart';
-export 'skills/skill_profile.dart';
-export 'skills/weakness.dart';
 
 class Protocol extends _is.DatabaseSerializationManager {
   Protocol._();
@@ -84,6 +78,129 @@ class Protocol extends _is.DatabaseSerializationManager {
   static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   static List<_isp.TableDefinition> get targetTableDefinitions => [
+    _isp.TableDefinition(
+      name: 'ai_usage',
+      dartName: 'AiUsage',
+      schema: 'public',
+      module: 'interview_arena',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'serial',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'feature',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'model',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'authUserId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'interviewSessionId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'resumeId',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'inputTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'outputTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'cacheReadTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'cacheWriteTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'characters',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+          columnDefault: '0',
+        ),
+        _isp.ColumnDefinition(
+          name: 'costUsd',
+          columnType: _isp.ColumnType.doublePrecision,
+          isNullable: true,
+          dartType: 'double?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'ai_usage_created_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'ai_usage_interview_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'interviewSessionId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _isp.TableDefinition(
       name: 'answer',
       dartName: 'Answer',
@@ -96,12 +213,6 @@ class Protocol extends _is.DatabaseSerializationManager {
           isNullable: false,
           dartType: 'int?',
           columnDefault: 'serial',
-        ),
-        _isp.ColumnDefinition(
-          name: 'authUserId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
         ),
         _isp.ColumnDefinition(
           name: 'questionId',
@@ -134,19 +245,6 @@ class Protocol extends _is.DatabaseSerializationManager {
           dartType: 'protocol:AnswerFeedback?',
         ),
         _isp.ColumnDefinition(
-          name: 'embedding',
-          columnType: _isp.ColumnType.vector,
-          isNullable: true,
-          dartType: 'Vector(1024)?',
-          vectorDimension: 1024,
-        ),
-        _isp.ColumnDefinition(
-          name: 'embeddingModel',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
           name: 'createdAt',
           columnType: _isp.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -157,16 +255,6 @@ class Protocol extends _is.DatabaseSerializationManager {
       foreignKeys: [
         _isp.ForeignKeyDefinition(
           constraintName: 'answer_fk_0',
-          columns: ['authUserId'],
-          referenceTable: 'serverpod_auth_core_user',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.cascade,
-          matchType: null,
-        ),
-        _isp.ForeignKeyDefinition(
-          constraintName: 'answer_fk_1',
           columns: ['questionId'],
           referenceTable: 'question',
           referenceTableSchema: 'public',
@@ -188,218 +276,6 @@ class Protocol extends _is.DatabaseSerializationManager {
           ],
           type: 'btree',
           isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'answer_user_created_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'authUserId',
-            ),
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'createdAt',
-            ),
-          ],
-          type: 'btree',
-          isUnique: false,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'answer_embedding_hnsw_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'embedding',
-            ),
-          ],
-          type: 'hnsw',
-          isUnique: false,
-          isPrimary: false,
-          vectorDistanceFunction: _isp.VectorDistanceFunction.cosine,
-          vectorColumnType: _isp.ColumnType.vector,
-          parameters: {
-            'm': '16',
-            'ef_construction': '64',
-          },
-        ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'candidate_profile',
-      dartName: 'CandidateProfile',
-      schema: 'public',
-      module: 'interview_arena',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int?',
-          columnDefault: 'serial',
-        ),
-        _isp.ColumnDefinition(
-          name: 'authUserId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'displayName',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'targetRole',
-          columnType: _isp.ColumnType.text,
-          isNullable: true,
-          dartType: 'String?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'yearsOfExperience',
-          columnType: _isp.ColumnType.doublePrecision,
-          isNullable: true,
-          dartType: 'double?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'timeZone',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-          columnDefault: '\'UTC\'',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-        _isp.ColumnDefinition(
-          name: 'updatedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'candidate_profile_fk_0',
-          columns: ['authUserId'],
-          referenceTable: 'serverpod_auth_core_user',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.cascade,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'candidate_profile_auth_user_uidx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'authUserId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-      ],
-      managed: true,
-    ),
-    _isp.TableDefinition(
-      name: 'challenge',
-      dartName: 'Challenge',
-      schema: 'public',
-      module: 'interview_arena',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue?',
-          columnDefault: 'random_v7',
-        ),
-        _isp.ColumnDefinition(
-          name: 'scheduledFor',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-        ),
-        _isp.ColumnDefinition(
-          name: 'title',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'prompt',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _isp.ColumnDefinition(
-          name: 'category',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'protocol:QuestionCategory',
-        ),
-        _isp.ColumnDefinition(
-          name: 'difficulty',
-          columnType: _isp.ColumnType.text,
-          isNullable: false,
-          dartType: 'protocol:ChallengeDifficulty',
-          columnDefault: '\'medium\'',
-        ),
-        _isp.ColumnDefinition(
-          name: 'targetSkills',
-          columnType: _isp.ColumnType.jsonb,
-          isNullable: false,
-          dartType: 'List<String>',
-        ),
-        _isp.ColumnDefinition(
-          name: 'rubric',
-          columnType: _isp.ColumnType.jsonb,
-          isNullable: true,
-          dartType: 'List<String>?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'timeLimit',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'Duration?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'createdAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'challenge_scheduled_for_uidx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'scheduledFor',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -751,107 +627,6 @@ class Protocol extends _is.DatabaseSerializationManager {
       ],
       managed: true,
     ),
-    _isp.TableDefinition(
-      name: 'skill_profile',
-      dartName: 'SkillProfile',
-      schema: 'public',
-      module: 'interview_arena',
-      columns: [
-        _isp.ColumnDefinition(
-          name: 'id',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int?',
-          columnDefault: 'serial',
-        ),
-        _isp.ColumnDefinition(
-          name: 'authUserId',
-          columnType: _isp.ColumnType.uuid,
-          isNullable: false,
-          dartType: 'UuidValue',
-        ),
-        _isp.ColumnDefinition(
-          name: 'skillGraph',
-          columnType: _isp.ColumnType.jsonb,
-          isNullable: false,
-          dartType: 'Map<String,protocol:SkillNode>',
-        ),
-        _isp.ColumnDefinition(
-          name: 'weaknesses',
-          columnType: _isp.ColumnType.jsonb,
-          isNullable: false,
-          dartType: 'List<protocol:Weakness>',
-        ),
-        _isp.ColumnDefinition(
-          name: 'strengths',
-          columnType: _isp.ColumnType.jsonb,
-          isNullable: false,
-          dartType: 'List<String>',
-        ),
-        _isp.ColumnDefinition(
-          name: 'averageScores',
-          columnType: _isp.ColumnType.jsonb,
-          isNullable: true,
-          dartType: 'protocol:InterviewScores?',
-        ),
-        _isp.ColumnDefinition(
-          name: 'sessionsCompleted',
-          columnType: _isp.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-          columnDefault: '0',
-        ),
-        _isp.ColumnDefinition(
-          name: 'updatedAt',
-          columnType: _isp.ColumnType.timestampWithoutTimeZone,
-          isNullable: false,
-          dartType: 'DateTime',
-          columnDefault: 'now',
-        ),
-      ],
-      foreignKeys: [
-        _isp.ForeignKeyDefinition(
-          constraintName: 'skill_profile_fk_0',
-          columns: ['authUserId'],
-          referenceTable: 'serverpod_auth_core_user',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _isp.ForeignKeyAction.noAction,
-          onDelete: _isp.ForeignKeyAction.cascade,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _isp.IndexDefinition(
-          indexName: 'skill_profile_auth_user_uidx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'authUserId',
-            ),
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-        _isp.IndexDefinition(
-          indexName: 'skill_profile_graph_gin_idx',
-          tableSpace: null,
-          elements: [
-            _isp.IndexElementDefinition(
-              type: _isp.IndexElementDefinitionType.column,
-              definition: 'skillGraph',
-            ),
-          ],
-          type: 'gin',
-          isUnique: false,
-          isPrimary: false,
-          ginOperatorClass: _isp.GinOperatorClass.jsonbPathOps,
-        ),
-      ],
-      managed: true,
-    ),
     ..._iais.Protocol.targetTableDefinitions,
     ..._iacs.Protocol.targetTableDefinitions,
     ..._isp.Protocol.targetTableDefinitions,
@@ -887,17 +662,20 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _i8uejmxn.SignUpClosedException) {
       return _i8uejmxn.SignUpClosedException.fromJson(data) as T;
     }
-    if (t == _iylq4q0i.Challenge) {
-      return _iylq4q0i.Challenge.fromJson(data) as T;
+    if (t == _ihqm99my.AiCostAccessException) {
+      return _ihqm99my.AiCostAccessException.fromJson(data) as T;
     }
-    if (t == _igs032ca.ChallengeDifficulty) {
-      return _igs032ca.ChallengeDifficulty.fromJson(data) as T;
+    if (t == _is9tm0e4.AiCostLine) {
+      return _is9tm0e4.AiCostLine.fromJson(data) as T;
     }
-    if (t == _ir28uvix.AnswerEmbeddingFutureCallEmbedModel) {
-      return _ir28uvix.AnswerEmbeddingFutureCallEmbedModel.fromJson(data) as T;
+    if (t == _i061j709.AiCostSummary) {
+      return _i061j709.AiCostSummary.fromJson(data) as T;
     }
-    if (t == _ifd0qwzd.ResumeParseFutureCallParseModel) {
-      return _ifd0qwzd.ResumeParseFutureCallParseModel.fromJson(data) as T;
+    if (t == _icpn43qs.AiInterviewCost) {
+      return _icpn43qs.AiInterviewCost.fromJson(data) as T;
+    }
+    if (t == _i6v27zmd.AiUsage) {
+      return _i6v27zmd.AiUsage.fromJson(data) as T;
     }
     if (t == _ilptq4di.Answer) {
       return _ilptq4di.Answer.fromJson(data) as T;
@@ -932,6 +710,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _ipbu4009.EndInterview) {
       return _ipbu4009.EndInterview.fromJson(data) as T;
     }
+    if (t == _ipbu4009.VoiceModeChanged) {
+      return _ipbu4009.VoiceModeChanged.fromJson(data) as T;
+    }
     if (t == _ix0gec48.InterviewAccessException) {
       return _ix0gec48.InterviewAccessException.fromJson(data) as T;
     }
@@ -952,9 +733,6 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (t == _i8405n7p.QuestionCategory) {
       return _i8405n7p.QuestionCategory.fromJson(data) as T;
-    }
-    if (t == _i4trz3o8.CandidateProfile) {
-      return _i4trz3o8.CandidateProfile.fromJson(data) as T;
     }
     if (t == _izdd6kyx.ExtractedSkill) {
       return _izdd6kyx.ExtractedSkill.fromJson(data) as T;
@@ -977,41 +755,31 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _iq8k1g78.WorkExperience) {
       return _iq8k1g78.WorkExperience.fromJson(data) as T;
     }
-    if (t == _ifilxtcy.SkillNode) {
-      return _ifilxtcy.SkillNode.fromJson(data) as T;
-    }
-    if (t == _ioq46cla.SkillProfile) {
-      return _ioq46cla.SkillProfile.fromJson(data) as T;
-    }
-    if (t == _i7w5oxf5.Weakness) {
-      return _i7w5oxf5.Weakness.fromJson(data) as T;
-    }
     if (t == _is.getType<_i8uejmxn.SignUpClosedException?>()) {
       return (data != null
               ? _i8uejmxn.SignUpClosedException.fromJson(data)
               : null)
           as T;
     }
-    if (t == _is.getType<_iylq4q0i.Challenge?>()) {
-      return (data != null ? _iylq4q0i.Challenge.fromJson(data) : null) as T;
-    }
-    if (t == _is.getType<_igs032ca.ChallengeDifficulty?>()) {
+    if (t == _is.getType<_ihqm99my.AiCostAccessException?>()) {
       return (data != null
-              ? _igs032ca.ChallengeDifficulty.fromJson(data)
+              ? _ihqm99my.AiCostAccessException.fromJson(data)
               : null)
           as T;
     }
-    if (t == _is.getType<_ir28uvix.AnswerEmbeddingFutureCallEmbedModel?>()) {
-      return (data != null
-              ? _ir28uvix.AnswerEmbeddingFutureCallEmbedModel.fromJson(data)
-              : null)
+    if (t == _is.getType<_is9tm0e4.AiCostLine?>()) {
+      return (data != null ? _is9tm0e4.AiCostLine.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i061j709.AiCostSummary?>()) {
+      return (data != null ? _i061j709.AiCostSummary.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_ifd0qwzd.ResumeParseFutureCallParseModel?>()) {
-      return (data != null
-              ? _ifd0qwzd.ResumeParseFutureCallParseModel.fromJson(data)
-              : null)
+    if (t == _is.getType<_icpn43qs.AiInterviewCost?>()) {
+      return (data != null ? _icpn43qs.AiInterviewCost.fromJson(data) : null)
           as T;
+    }
+    if (t == _is.getType<_i6v27zmd.AiUsage?>()) {
+      return (data != null ? _i6v27zmd.AiUsage.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_ilptq4di.Answer?>()) {
       return (data != null ? _ilptq4di.Answer.fromJson(data) : null) as T;
@@ -1053,6 +821,10 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (t == _is.getType<_ipbu4009.EndInterview?>()) {
       return (data != null ? _ipbu4009.EndInterview.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_ipbu4009.VoiceModeChanged?>()) {
+      return (data != null ? _ipbu4009.VoiceModeChanged.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_ix0gec48.InterviewAccessException?>()) {
       return (data != null
               ? _ix0gec48.InterviewAccessException.fromJson(data)
@@ -1082,10 +854,6 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _i8405n7p.QuestionCategory.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_i4trz3o8.CandidateProfile?>()) {
-      return (data != null ? _i4trz3o8.CandidateProfile.fromJson(data) : null)
-          as T;
-    }
     if (t == _is.getType<_izdd6kyx.ExtractedSkill?>()) {
       return (data != null ? _izdd6kyx.ExtractedSkill.fromJson(data) : null)
           as T;
@@ -1112,29 +880,20 @@ class Protocol extends _is.DatabaseSerializationManager {
       return (data != null ? _iq8k1g78.WorkExperience.fromJson(data) : null)
           as T;
     }
-    if (t == _is.getType<_ifilxtcy.SkillNode?>()) {
-      return (data != null ? _ifilxtcy.SkillNode.fromJson(data) : null) as T;
+    if (t == List<_is9tm0e4.AiCostLine>) {
+      return (data as List)
+              .map((e) => deserialize<_is9tm0e4.AiCostLine>(e))
+              .toList()
+          as T;
     }
-    if (t == _is.getType<_ioq46cla.SkillProfile?>()) {
-      return (data != null ? _ioq46cla.SkillProfile.fromJson(data) : null) as T;
-    }
-    if (t == _is.getType<_i7w5oxf5.Weakness?>()) {
-      return (data != null ? _i7w5oxf5.Weakness.fromJson(data) : null) as T;
+    if (t == List<_icpn43qs.AiInterviewCost>) {
+      return (data as List)
+              .map((e) => deserialize<_icpn43qs.AiInterviewCost>(e))
+              .toList()
+          as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
-    }
-    if (t == _is.getType<List<String>?>()) {
-      return (data != null
-              ? (data as List).map((e) => deserialize<String>(e)).toList()
-              : null)
-          as T;
-    }
-    if (t == Map<String, double>) {
-      return (data as Map).map(
-            (k, v) => MapEntry(deserialize<String>(k), deserialize<double>(v)),
-          )
-          as T;
     }
     if (t == List<_ihpdvrxq.Question>) {
       return (data as List)
@@ -1176,23 +935,11 @@ class Protocol extends _is.DatabaseSerializationManager {
               .toList()
           as T;
     }
-    if (t == Map<String, _ifilxtcy.SkillNode>) {
-      return (data as Map).map(
-            (k, v) => MapEntry(
-              deserialize<String>(k),
-              deserialize<_ifilxtcy.SkillNode>(v),
-            ),
-          )
+    if (t == _is.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
           as T;
-    }
-    if (t == List<_i7w5oxf5.Weakness>) {
-      return (data as List)
-              .map((e) => deserialize<_i7w5oxf5.Weakness>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<int>) {
-      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
     if (t == List<_i7dogz11.InterviewSession>) {
       return (data as List)
@@ -1221,12 +968,11 @@ class Protocol extends _is.DatabaseSerializationManager {
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i8uejmxn.SignUpClosedException => 'SignUpClosedException',
-      _iylq4q0i.Challenge => 'Challenge',
-      _igs032ca.ChallengeDifficulty => 'ChallengeDifficulty',
-      _ir28uvix.AnswerEmbeddingFutureCallEmbedModel =>
-        'AnswerEmbeddingFutureCallEmbedModel',
-      _ifd0qwzd.ResumeParseFutureCallParseModel =>
-        'ResumeParseFutureCallParseModel',
+      _ihqm99my.AiCostAccessException => 'AiCostAccessException',
+      _is9tm0e4.AiCostLine => 'AiCostLine',
+      _i061j709.AiCostSummary => 'AiCostSummary',
+      _icpn43qs.AiInterviewCost => 'AiInterviewCost',
+      _i6v27zmd.AiUsage => 'AiUsage',
       _ilptq4di.Answer => 'Answer',
       _iq8f7lpk.AnswerFeedback => 'AnswerFeedback',
       _i9r9cihw.AnswerEvaluated => 'AnswerEvaluated',
@@ -1238,6 +984,7 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ipbu4009.AnswerChunk => 'AnswerChunk',
       _ipbu4009.AnswerSubmitted => 'AnswerSubmitted',
       _ipbu4009.EndInterview => 'EndInterview',
+      _ipbu4009.VoiceModeChanged => 'VoiceModeChanged',
       _ix0gec48.InterviewAccessException => 'InterviewAccessException',
       _ihpfwdr6.InterviewReport => 'InterviewReport',
       _i0s2zm9r.InterviewScores => 'InterviewScores',
@@ -1245,7 +992,6 @@ class Protocol extends _is.DatabaseSerializationManager {
       _ifyqp54v.InterviewStatus => 'InterviewStatus',
       _ihpdvrxq.Question => 'Question',
       _i8405n7p.QuestionCategory => 'QuestionCategory',
-      _i4trz3o8.CandidateProfile => 'CandidateProfile',
       _izdd6kyx.ExtractedSkill => 'ExtractedSkill',
       _ivs53uxk.ParsedResume => 'ParsedResume',
       _ipkmgecw.Resume => 'Resume',
@@ -1253,9 +999,6 @@ class Protocol extends _is.DatabaseSerializationManager {
       _imejjlr6.ResumeParseStatus => 'ResumeParseStatus',
       _ieef7w2g.ResumeUploadTicket => 'ResumeUploadTicket',
       _iq8k1g78.WorkExperience => 'WorkExperience',
-      _ifilxtcy.SkillNode => 'SkillNode',
-      _ioq46cla.SkillProfile => 'SkillProfile',
-      _i7w5oxf5.Weakness => 'Weakness',
       _ => null,
     };
   }
@@ -1275,14 +1018,16 @@ class Protocol extends _is.DatabaseSerializationManager {
     switch (data) {
       case _i8uejmxn.SignUpClosedException():
         return 'SignUpClosedException';
-      case _iylq4q0i.Challenge():
-        return 'Challenge';
-      case _igs032ca.ChallengeDifficulty():
-        return 'ChallengeDifficulty';
-      case _ir28uvix.AnswerEmbeddingFutureCallEmbedModel():
-        return 'AnswerEmbeddingFutureCallEmbedModel';
-      case _ifd0qwzd.ResumeParseFutureCallParseModel():
-        return 'ResumeParseFutureCallParseModel';
+      case _ihqm99my.AiCostAccessException():
+        return 'AiCostAccessException';
+      case _is9tm0e4.AiCostLine():
+        return 'AiCostLine';
+      case _i061j709.AiCostSummary():
+        return 'AiCostSummary';
+      case _icpn43qs.AiInterviewCost():
+        return 'AiInterviewCost';
+      case _i6v27zmd.AiUsage():
+        return 'AiUsage';
       case _ilptq4di.Answer():
         return 'Answer';
       case _iq8f7lpk.AnswerFeedback():
@@ -1305,6 +1050,8 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'AnswerSubmitted';
       case _ipbu4009.EndInterview():
         return 'EndInterview';
+      case _ipbu4009.VoiceModeChanged():
+        return 'VoiceModeChanged';
       case _ix0gec48.InterviewAccessException():
         return 'InterviewAccessException';
       case _ihpfwdr6.InterviewReport():
@@ -1319,8 +1066,6 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'Question';
       case _i8405n7p.QuestionCategory():
         return 'QuestionCategory';
-      case _i4trz3o8.CandidateProfile():
-        return 'CandidateProfile';
       case _izdd6kyx.ExtractedSkill():
         return 'ExtractedSkill';
       case _ivs53uxk.ParsedResume():
@@ -1335,12 +1080,6 @@ class Protocol extends _is.DatabaseSerializationManager {
         return 'ResumeUploadTicket';
       case _iq8k1g78.WorkExperience():
         return 'WorkExperience';
-      case _ifilxtcy.SkillNode():
-        return 'SkillNode';
-      case _ioq46cla.SkillProfile():
-        return 'SkillProfile';
-      case _i7w5oxf5.Weakness():
-        return 'Weakness';
     }
     className = _iais.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -1370,21 +1109,20 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'SignUpClosedException') {
       return deserialize<_i8uejmxn.SignUpClosedException>(data['data']);
     }
-    if (dataClassName == 'Challenge') {
-      return deserialize<_iylq4q0i.Challenge>(data['data']);
+    if (dataClassName == 'AiCostAccessException') {
+      return deserialize<_ihqm99my.AiCostAccessException>(data['data']);
     }
-    if (dataClassName == 'ChallengeDifficulty') {
-      return deserialize<_igs032ca.ChallengeDifficulty>(data['data']);
+    if (dataClassName == 'AiCostLine') {
+      return deserialize<_is9tm0e4.AiCostLine>(data['data']);
     }
-    if (dataClassName == 'AnswerEmbeddingFutureCallEmbedModel') {
-      return deserialize<_ir28uvix.AnswerEmbeddingFutureCallEmbedModel>(
-        data['data'],
-      );
+    if (dataClassName == 'AiCostSummary') {
+      return deserialize<_i061j709.AiCostSummary>(data['data']);
     }
-    if (dataClassName == 'ResumeParseFutureCallParseModel') {
-      return deserialize<_ifd0qwzd.ResumeParseFutureCallParseModel>(
-        data['data'],
-      );
+    if (dataClassName == 'AiInterviewCost') {
+      return deserialize<_icpn43qs.AiInterviewCost>(data['data']);
+    }
+    if (dataClassName == 'AiUsage') {
+      return deserialize<_i6v27zmd.AiUsage>(data['data']);
     }
     if (dataClassName == 'Answer') {
       return deserialize<_ilptq4di.Answer>(data['data']);
@@ -1419,6 +1157,9 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'EndInterview') {
       return deserialize<_ipbu4009.EndInterview>(data['data']);
     }
+    if (dataClassName == 'VoiceModeChanged') {
+      return deserialize<_ipbu4009.VoiceModeChanged>(data['data']);
+    }
     if (dataClassName == 'InterviewAccessException') {
       return deserialize<_ix0gec48.InterviewAccessException>(data['data']);
     }
@@ -1440,9 +1181,6 @@ class Protocol extends _is.DatabaseSerializationManager {
     if (dataClassName == 'QuestionCategory') {
       return deserialize<_i8405n7p.QuestionCategory>(data['data']);
     }
-    if (dataClassName == 'CandidateProfile') {
-      return deserialize<_i4trz3o8.CandidateProfile>(data['data']);
-    }
     if (dataClassName == 'ExtractedSkill') {
       return deserialize<_izdd6kyx.ExtractedSkill>(data['data']);
     }
@@ -1463,15 +1201,6 @@ class Protocol extends _is.DatabaseSerializationManager {
     }
     if (dataClassName == 'WorkExperience') {
       return deserialize<_iq8k1g78.WorkExperience>(data['data']);
-    }
-    if (dataClassName == 'SkillNode') {
-      return deserialize<_ifilxtcy.SkillNode>(data['data']);
-    }
-    if (dataClassName == 'SkillProfile') {
-      return deserialize<_ioq46cla.SkillProfile>(data['data']);
-    }
-    if (dataClassName == 'Weakness') {
-      return deserialize<_i7w5oxf5.Weakness>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
@@ -1514,20 +1243,16 @@ class Protocol extends _is.DatabaseSerializationManager {
       }
     }
     switch (t) {
-      case _iylq4q0i.Challenge:
-        return _iylq4q0i.Challenge.t;
+      case _i6v27zmd.AiUsage:
+        return _i6v27zmd.AiUsage.t;
       case _ilptq4di.Answer:
         return _ilptq4di.Answer.t;
       case _illbuy7a.InterviewSession:
         return _illbuy7a.InterviewSession.t;
       case _ihpdvrxq.Question:
         return _ihpdvrxq.Question.t;
-      case _i4trz3o8.CandidateProfile:
-        return _i4trz3o8.CandidateProfile.t;
       case _ipkmgecw.Resume:
         return _ipkmgecw.Resume.t;
-      case _ioq46cla.SkillProfile:
-        return _ioq46cla.SkillProfile.t;
     }
     return null;
   }

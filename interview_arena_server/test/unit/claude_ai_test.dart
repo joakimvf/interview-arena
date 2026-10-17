@@ -8,100 +8,51 @@ import 'package:interview_arena_server/src/ai/interview_ai.dart';
 import 'package:interview_arena_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
-String _sse(List<(String, Map<String, dynamic>)> events) => [
-  for (final (name, data) in events)
-    'event: $name\ndata: ${jsonEncode(data)}\n\n',
-].join();
-
+/// A Message response whose answer follows a thinking block.
 String _jsonReply(
   Map<String, dynamic> json, {
   String stop = 'end_turn',
-}) => _sse([
-  (
-    'message_start',
-    {
-      'type': 'message_start',
-      'message': {
-        'id': 'msg_1',
-        'model': 'claude-opus-5-5',
-        'usage': {'input_tokens': 10},
-      },
-    },
-  ),
-  (
-    'content_block_start',
-    {
-      'type': 'content_block_start',
-      'index': 0,
-      'content_block': {'type': 'thinking', 'thinking': ''},
-    },
-  ),
-  (
-    'content_block_delta',
-    {
-      'type': 'content_block_delta',
-      'index': 0,
-      'delta': {'type': 'signature_delta', 'signature': 'sig'},
-    },
-  ),
-  ('content_block_stop', {'type': 'content_block_stop', 'index': 0}),
-  ('ping', {'type': 'ping'}),
-  (
-    'content_block_start',
-    {
-      'type': 'content_block_start',
-      'index': 1,
-      'content_block': {'type': 'text', 'text': ''},
-    },
-  ),
-  (
-    'content_block_delta',
-    {
-      'type': 'content_block_delta',
-      'index': 1,
-      'delta': {'type': 'text_delta', 'text': jsonEncode(json).substring(0, 5)},
-    },
-  ),
-  (
-    'content_block_delta',
-    {
-      'type': 'content_block_delta',
-      'index': 1,
-      'delta': {'type': 'text_delta', 'text': jsonEncode(json).substring(5)},
-    },
-  ),
-  ('content_block_stop', {'type': 'content_block_stop', 'index': 1}),
-  (
-    'message_delta',
-    {
-      'type': 'message_delta',
-      'delta': {'stop_reason': stop},
-      'usage': {'output_tokens': 20},
-    },
-  ),
-  ('message_stop', {'type': 'message_stop'}),
-]);
+  String model = 'claude-sonnet-5-5',
+}) => jsonEncode({
+  'id': 'msg_1',
+  'type': 'message',
+  'model': model,
+  'content': [
+    {'type': 'thinking', 'thinking': '', 'signature': 'sig'},
+    {'type': 'text', 'text': jsonEncode(json)},
+  ],
+  'stop_reason': stop,
+  'usage': {
+    'input_tokens': 10,
+    'output_tokens': 20,
+    'cache_read_input_tokens': 5,
+  },
+});
 
 void main() {
   late http.BaseRequest lastRequest;
   late Map<String, dynamic> lastBody;
+  late List<(String, String, Map<String, dynamic>)> usages;
 
-  ClaudeInterviewAi aiReplying(String sse) => ClaudeInterviewAi(
-    ClaudeHttpClient(
-      apiKey: 'dummy',
-      maxRetries: 0,
-      httpClient: MockClient.streaming((request, body) async {
-        lastRequest = request;
-        lastBody =
-            jsonDecode(await body.bytesToString()) as Map<String, dynamic>;
-        return http.StreamedResponse(
-          Stream.value(utf8.encode(sse)),
-          200,
-          headers: {'content-type': 'text/event-stream', 'request-id': 'req_1'},
-        );
-      }),
-    ),
-  );
+  ClaudeInterviewAi aiReplying(String reply) {
+    usages = [];
+    return ClaudeInterviewAi(
+      ClaudeHttpClient(
+        apiKey: 'dummy',
+        maxRetries: 0,
+        httpClient: MockClient((request) async {
+          lastRequest = request;
+          lastBody = jsonDecode(request.body) as Map<String, dynamic>;
+          return http.Response(
+            reply,
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      ),
+      onUsage: (route, model, usage) => usages.add((route.name, model, usage)),
+    );
+  }
 
   final ctx = InterviewContext(
     targetRole: 'Backend',
@@ -122,9 +73,6 @@ void main() {
         'summary': 's',
         'strengths': ['a'],
         'improvements': ['b'],
-        'skillDeltas': [
-          {'skill': 'sql', 'delta': -2.5},
-        ],
       }),
     );
     final r = await ai.evaluateAnswer(ctx, 'Q', 'A');
@@ -134,24 +82,45 @@ void main() {
       lastRequest.headers['anthropic-beta'],
       'server-side-fallback-2026-07-01',
     );
-    expect(lastBody['model'], 'claude-opus-5-5');
-    expect(lastBody['stream'], isTrue);
+    expect(lastBody['model'], 'claude-sonnet-5-5');
+    expect(lastBody.containsKey('stream'), isFalse);
     expect(lastBody['fallbacks'], 'default');
-    expect(lastBody.containsKey('thinking'), isFalse); // always on for Opus 5.5
-    expect(lastBody['output_config']['effort'], 'high');
+    expect(lastBody.containsKey('thinking'), isFalse); // adaptive by default
+    expect(lastBody['output_config']['effort'], 'medium');
     expect(lastBody['output_config']['format']['type'], 'json_schema');
     expect(
       lastBody['output_config']['format']['schema']['additionalProperties'],
       isFalse,
     );
-    expect(lastBody['system'][0]['cache_control'], {'type': 'ephemeral'});
+    expect(lastBody['system'], ClaudeInterviewAi.scoringSystem);
     expect(r.scores.communication, 72);
     expect(
       r.scores.confidence,
       100,
     ); // clamped in code (no schema minimum/maximum)
     expect(r.scores.structure, 0);
-    expect(r.feedback.skillDeltas, {'sql': -2.5});
+    expect(r.feedback.improvements, ['b']);
+    expect(usages.single.$1, 'evaluation');
+    expect(usages.single.$2, 'claude-sonnet-5-5');
+    expect(usages.single.$3['cache_read_input_tokens'], 5);
+  });
+
+  test('scorePartial runs on Haiku without a server-side fallback', () async {
+    final ai = aiReplying(
+      _jsonReply({
+        'communication': 50,
+        'confidence': 50,
+        'technicalDepth': 50,
+        'completeness': 50,
+        'structure': 50,
+      }, model: 'claude-haiku-5-5'),
+    );
+    await ai.scorePartial(ctx, 'Q', 'A');
+    expect(lastBody['model'], 'claude-haiku-5-5');
+    expect(lastBody['output_config']['effort'], 'low');
+    expect(lastBody.containsKey('fallbacks'), isFalse);
+    expect(lastRequest.headers.containsKey('anthropic-beta'), isFalse);
+    expect(usages.single.$1, 'partial');
   });
 
   test('a refusal surfaces as AiUnavailableException(refusal)', () async {
@@ -188,6 +157,8 @@ void main() {
     );
     final pdf = Uint8List.fromList(utf8.encode('%PDF-1.7 fake'));
     final p = await ai.parseResume(pdf);
+    expect(lastBody['model'], 'claude-haiku-5-5');
+    expect(lastBody.containsKey('fallbacks'), isFalse);
     final content = lastBody['messages'][0]['content'] as List;
     expect(content[0]['type'], 'document');
     expect(content[0]['source']['media_type'], 'application/pdf');

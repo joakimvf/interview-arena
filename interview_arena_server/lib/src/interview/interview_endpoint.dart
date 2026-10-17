@@ -4,11 +4,7 @@ import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart'; // authUserId extension
 
 import '../ai/interview_ai.dart';
-import '../background.dart';
-import '../generated/future_calls.dart'; // ServerpodFutureCallsGetter
 import '../generated/protocol.dart';
-import '../skills/skill_graph.dart';
-import 'answer_embedding_future_call.dart';
 import 'voice_endpoint.dart';
 
 class InterviewEndpoint extends Endpoint {
@@ -18,8 +14,11 @@ class InterviewEndpoint extends Endpoint {
   bool get requireLogin => true;
 
   /// Live partial scoring throttle (tests set Duration.zero).
-  static Duration partialScoreInterval = const Duration(seconds: 8);
+  static Duration partialScoreInterval = const Duration(seconds: 15);
   static const minPartialChars = 80;
+
+  /// Re-score a partial answer only once this much more has been said.
+  static int minNewPartialChars = 120;
   static const fallbackQuestion =
       'Tell me about a project you are proud of and your role in it.';
 
@@ -108,7 +107,11 @@ class InterviewEndpoint extends Endpoint {
       columnValues: (t) => [t.status(InterviewStatus.active)],
     );
 
-    final ai = interviewAiFactory(session);
+    final ai = interviewAiFactory(session, (
+      authUserId: authUserId,
+      interviewSessionId: id,
+      resumeId: interview.resumeId,
+    ));
     final questions = <Question>[...?interview.questions];
     final answered = <int, Answer>{
       for (final q in questions)
@@ -117,6 +120,8 @@ class InterviewEndpoint extends Endpoint {
     var aggregate = interview.scores;
     var sequence = 0;
     var finished = false;
+    // Off until the client says otherwise (VoiceModeChanged).
+    var voiceMode = false;
 
     // Safety net; on a client cancel the after-loop code runs first (spike B).
     session.addWillCloseListener((s) async {
@@ -164,15 +169,20 @@ class InterviewEndpoint extends Endpoint {
         ),
       );
       questions.add(q);
-      // Start synthesizing the spoken question now; the client's
-      // questionAudio request then usually finds it ready.
-      unawaited(
-        VoiceEndpoint.audioFor(session, q).then(
-          (_) {},
-          onError: (Object e) =>
-              session.log('question audio failed: $e', level: LogLevel.warning),
-        ),
-      );
+      // In voice mode, start synthesizing the spoken question now; the
+      // client's questionAudio request then finds it ready. Typed interviews
+      // never call ElevenLabs.
+      if (voiceMode) {
+        unawaited(
+          VoiceEndpoint.audioFor(session, q).then(
+            (_) {},
+            onError: (Object e) => session.log(
+              'question audio failed: $e',
+              level: LogLevel.warning,
+            ),
+          ),
+        );
+      }
       return q;
     }
 
@@ -212,27 +222,6 @@ class InterviewEndpoint extends Endpoint {
           t.endedAt(DateTime.now().toUtc()),
         ],
       );
-      if (scores != null) {
-        final profile = await SkillGraph.getOrCreate(session, authUserId);
-        final n = profile.sessionsCompleted;
-        final prev = profile.averageScores;
-        double mean(double Function(InterviewScores) f) =>
-            prev == null ? f(scores) : (f(prev) * n + f(scores)) / (n + 1);
-        await SkillProfile.db.updateRow(
-          session,
-          profile.copyWith(
-            sessionsCompleted: n + 1,
-            // Running mean over all scored interviews, not just the latest.
-            averageScores: InterviewScores(
-              communication: mean((s) => s.communication),
-              confidence: mean((s) => s.confidence),
-              technicalDepth: mean((s) => s.technicalDepth),
-              completeness: mean((s) => s.completeness),
-              structure: mean((s) => s.structure),
-            ),
-          ),
-        );
-      }
       return InterviewFinished(
         interviewSessionId: id,
         sequence: sequence++,
@@ -265,16 +254,23 @@ class InterviewEndpoint extends Endpoint {
     yield asked(current);
 
     var lastPartialAt = DateTime.fromMillisecondsSinceEpoch(0);
+    int? lastPartialQuestionId;
+    var lastPartialLength = 0;
     await for (final input in inputs) {
       switch (input) {
         case AnswerChunk(:final questionId, :final textSoFar):
           final now = DateTime.now();
+          final rescoring = questionId == lastPartialQuestionId;
           if (questionId != current!.id ||
               textSoFar.length < minPartialChars ||
+              (rescoring &&
+                  textSoFar.length - lastPartialLength < minNewPartialChars) ||
               now.difference(lastPartialAt) < partialScoreInterval) {
             break;
           }
           lastPartialAt = now;
+          lastPartialQuestionId = questionId;
+          lastPartialLength = textSoFar.length;
           try {
             final scores = await ai.scorePartial(
               ctx(),
@@ -305,7 +301,6 @@ class InterviewEndpoint extends Endpoint {
           final answer = await Answer.db.insertRow(
             session,
             Answer(
-              authUserId: authUserId,
               questionId: q.id!,
               transcript: transcript,
               answerDuration: answerDuration,
@@ -346,24 +341,6 @@ class InterviewEndpoint extends Endpoint {
                   t.questionCount(answered.length),
                 ],
               );
-              await SkillGraph.applyEvaluation(
-                session,
-                authUserId,
-                eval.feedback,
-                answer.id!,
-              );
-              await scheduleOrRun(
-                session,
-                name: 'Answer ${answer.id} embedding',
-                schedule: () => session.serverpod.futureCalls
-                    .callWithDelay(
-                      Duration.zero,
-                      identifier: 'embed-${answer.id}',
-                    )
-                    .answerEmbedding
-                    .embed(answer.id!),
-                run: (s) => AnswerEmbeddingFutureCall().embed(s, answer.id!),
-              );
               return (eval: eval, agg: agg);
             } catch (e) {
               evalError = e;
@@ -398,6 +375,12 @@ class InterviewEndpoint extends Endpoint {
             yield await finish();
             return; // completes the output: client gets onDone
           }
+
+        case VoiceModeChanged(:final enabled):
+          // Applies from the next question: the current one is either already
+          // being fetched by the client (start of the interview) or isn't
+          // played at all (switching to voice mid-answer keeps the answer).
+          voiceMode = enabled;
 
         case EndInterview():
           yield await finish();

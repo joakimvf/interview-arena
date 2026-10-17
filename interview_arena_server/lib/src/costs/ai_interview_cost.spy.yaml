@@ -1,0 +1,9 @@
+### AI spend of one interview (questions, scoring, report and voice).
+class: AiInterviewCost
+fields:
+  interviewSessionId: int
+  ### Null when the interview has been deleted.
+  targetRole: String?
+  startedAt: DateTime?
+  calls: int
+  costUsd: double

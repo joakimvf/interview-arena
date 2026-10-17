@@ -31,8 +31,9 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
   var _shownAt = DateTime.now();
   var _lastPartialAt = DateTime.fromMillisecondsSinceEpoch(0);
 
-  /// The server only scores partials every few seconds; don't flood it.
-  static const _partialEvery = Duration(milliseconds: 1500);
+  /// The server scores a partial answer at most every 15 s; sending more
+  /// often than this only adds traffic it throws away.
+  static const _partialEvery = Duration(seconds: 5);
 
   @override
   void initState() {
@@ -59,6 +60,7 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
     if (!mounted) return;
     if (_voiceMode && !_voice.micAvailable) {
       _voiceMode = false;
+      _controller.setVoiceMode(enabled: false);
       _snack('Microphone unavailable here, so you can type your answers.');
     }
     setState(() {});
@@ -82,6 +84,7 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
       _begun = true;
       _voiceMode = voice;
     });
+    _controller.setVoiceMode(enabled: voice);
     final q = _state.question;
     if (voice && q != null && !_state.awaitingNext) _voice.ask(q.questionId);
   }
@@ -109,10 +112,12 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
   Future<void> _toTyping() async {
     await _voice.stop();
     setState(() => _voiceMode = false);
+    _controller.setVoiceMode(enabled: false);
   }
 
   void _toVoice() {
     setState(() => _voiceMode = true);
+    _controller.setVoiceMode(enabled: true);
     if (!_state.awaitingNext) _voice.listenFrom(_answer.text);
   }
 
@@ -239,7 +244,9 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
                     voice: _voice,
                     showStrip: !wide,
                     onDone: _doneSpeaking,
-                    onReplay: _voice.replay,
+                    onReplay: () {
+                      if (s.question case final q?) _voice.replay(q.questionId);
+                    },
                     onType: _toTyping,
                   )
                 : _TypingStage(
@@ -562,7 +569,9 @@ class _VoiceStage extends StatelessWidget {
                     IconButton.outlined(
                       tooltip: 'Hear the question again',
                       onPressed:
-                          voice.interviewerVoiceAvailable && !state.awaitingNext
+                          voice.interviewerVoiceAvailable &&
+                              !state.awaitingNext &&
+                              voice.phase != VoicePhase.preparing
                           ? onReplay
                           : null,
                       icon: const Icon(Icons.replay),

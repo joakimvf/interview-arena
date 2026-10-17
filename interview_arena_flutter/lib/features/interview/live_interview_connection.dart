@@ -52,6 +52,11 @@ class LiveInterviewConnection {
         ),
       );
 
+  /// Speaking or typing; the server only makes question audio in voice mode.
+  void voiceMode({required bool enabled}) => _inputs?.add(
+    VoiceModeChanged(clientSeq: _clientSeq++, enabled: enabled),
+  );
+
   void end() => _inputs?.add(EndInterview(clientSeq: _clientSeq++));
 
   Future<void> dispose() async {

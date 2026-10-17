@@ -1,0 +1,17 @@
+# Files written by `serverpod generate` and `serverpod create-migration`.
+# They stay committed (the Flutter app depends on the generated client, and
+# builds must not need the CLI), but GitHub collapses them in pull requests
+# and leaves them out of the language stats, so reviews show the hand-written
+# changes. Never edit them by hand; see AGENTS.md.
+
+# Generated server code, client package and test tools.
+interview_arena_server/lib/src/generated/** linguist-generated=true
+interview_arena_client/lib/src/protocol/** linguist-generated=true
+interview_arena_server/test/integration/test_tools/** linguist-generated=true
+
+# Migration snapshots (the full schema at each migration). migration.sql is
+# not listed, so the SQL that actually runs stays visible in reviews.
+interview_arena_server/migrations/*/definition.json linguist-generated=true
+interview_arena_server/migrations/*/definition.sql linguist-generated=true
+interview_arena_server/migrations/*/definition_project.json linguist-generated=true
+interview_arena_server/migrations/*/migration.json linguist-generated=true

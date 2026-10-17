@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'dart:async';
+
 import 'package:serverpod/serverpod.dart';
 
+import '../costs/ai_usage_tracker.dart';
 import '../generated/protocol.dart';
 import 'anthropic_client.dart';
 
@@ -69,38 +72,101 @@ abstract interface class InterviewAi {
 
 /// Overridable in tests (same isolate as withServerpod's in-process server).
 /// Endpoints are constructed by generated code, so there is no constructor
-/// injection.
-InterviewAi Function(Session session) interviewAiFactory = (session) {
+/// injection. [context] says what the calls are for, so their cost is
+/// recorded against it in `ai_usage`.
+InterviewAi Function(Session session, [AiUsageContext? context])
+interviewAiFactory = (session, [context]) {
   final key = session.passwords['anthropicApiKey'];
   if (key == null || key.isEmpty) {
     throw AiUnavailableException('not_configured', 'anthropicApiKey missing');
   }
-  return ClaudeInterviewAi(ClaudeHttpClient(apiKey: key));
+  return ClaudeInterviewAi(
+    ClaudeHttpClient(apiKey: key),
+    onUsage: (route, model, usage) => AiUsageTracker.recordClaude(
+      session,
+      feature: route.name,
+      model: model,
+      usage: usage,
+      context: context,
+    ),
+  );
 };
 
-/// Per-route model + effort. All routes default to Claude Opus 5.5; swapping a
-/// route to claude-sonnet-5-5 / claude-haiku-5-5 is a user decision.
+/// Per-route model + effort, sized to the job: Haiku for the high-volume or
+/// extraction routes, Sonnet where the interviewer's judgment shows.
 class ClaudeRoute {
-  const ClaudeRoute(this.model, this.effort, this.maxTokens);
+  const ClaudeRoute(
+    this.name,
+    this.model,
+    this.effort,
+    this.maxTokens, {
+    this.serverFallback = true,
+  });
+  final String name;
   final String model;
   final String effort;
+
+  /// Includes thinking tokens, which can't be turned off on these models.
   final int maxTokens;
+
+  /// Whether to ask for a server-side fallback model on a refusal. Haiku 5.5
+  /// has none, so its routes leave it out.
+  final bool serverFallback;
 }
 
-class ClaudeInterviewAi implements InterviewAi {
-  ClaudeInterviewAi(this._api);
-  final ClaudeHttpClient _api;
+/// Called after every Claude response with its `usage` block.
+typedef ClaudeUsageListener =
+    FutureOr<void> Function(
+      ClaudeRoute route,
+      String model,
+      Map<String, dynamic> usage,
+    );
 
-  static const question = ClaudeRoute('claude-opus-5-5', 'low', 16000);
-  static const partial = ClaudeRoute('claude-opus-5-5', 'low', 8000);
-  static const evaluation = ClaudeRoute('claude-opus-5-5', 'high', 32000);
-  static const summary = ClaudeRoute('claude-opus-5-5', 'medium', 16000);
-  static const resumeParse = ClaudeRoute('claude-opus-5-5', 'low', 32000);
+class ClaudeInterviewAi implements InterviewAi {
+  ClaudeInterviewAi(this._api, {this.onUsage});
+  final ClaudeHttpClient _api;
+  final ClaudeUsageListener? onUsage;
+
+  static const question = ClaudeRoute(
+    'question',
+    'claude-sonnet-5-5',
+    'low',
+    4000,
+  );
+
+  /// Runs every few seconds while the candidate speaks: cheap and fast.
+  static const partial = ClaudeRoute(
+    'partial',
+    'claude-haiku-5-5',
+    'low',
+    2000,
+    serverFallback: false,
+  );
+  static const evaluation = ClaudeRoute(
+    'evaluation',
+    'claude-sonnet-5-5',
+    'medium',
+    8000,
+  );
+  static const summary = ClaudeRoute(
+    'summary',
+    'claude-sonnet-5-5',
+    'medium',
+    8000,
+  );
+  static const resumeParse = ClaudeRoute(
+    'resumeParse',
+    'claude-haiku-5-5',
+    'low',
+    16000,
+    serverFallback: false,
+  );
 
   static const fallbackBeta = 'server-side-fallback-2026-07-01';
 
-  // Frozen system prompts (never interpolate per-request data here: it would
-  // invalidate the cache). Keep each >= 512 tokens in production so it caches.
+  // Frozen system prompts: never interpolate per-request data here. They are
+  // below the 512-token cache minimum on their own; the interview transcript
+  // routes cache through the breakpoint on the last transcript block instead.
   static const interviewerSystem =
       'You are a senior interviewer running a live mock job interview. '
       'You receive the target role, the candidate resume as JSON, and the '
@@ -181,20 +247,11 @@ class ClaudeInterviewAi implements InterviewAi {
 
   static final scoresSchema = _obj(_scoreProps);
 
-  // Map<String,double> cannot be expressed with additionalProperties:false,
-  // so skill deltas come back as a list of {skill, delta}.
   static final evaluationSchema = _obj({
     ..._scoreProps,
     'summary': _str,
     'strengths': _strList,
     'improvements': _strList,
-    'skillDeltas': {
-      'type': 'array',
-      'items': _obj({
-        'skill': _str,
-        'delta': {'type': 'number'},
-      }),
-    },
   });
 
   static final reportSchema = _obj({
@@ -239,8 +296,8 @@ class ClaudeInterviewAi implements InterviewAi {
 
   /// Append-only content blocks: [context] + one block per answered turn.
   /// Each request is a single user turn, so no thinking blocks are ever
-  /// replayed (no preserved-thinking edits possible). The cache breakpoint on
-  /// the last block lets the next request (same blocks + one more) read it.
+  /// replayed. The cache breakpoint on the last block lets the next request
+  /// (same blocks + one more) read it.
   List<Map<String, dynamic>> _transcriptBlocks(InterviewContext ctx) {
     final blocks = <Map<String, dynamic>>[
       {
@@ -269,35 +326,37 @@ class ClaudeInterviewAi implements InterviewAi {
     Map<String, dynamic> schema,
   ) => {
     'model': r.model,
-    'max_tokens': r.maxTokens, // includes thinking tokens
-    'fallbacks': 'default',
+    'max_tokens': r.maxTokens,
+    if (r.serverFallback) 'fallbacks': 'default',
     'output_config': {
       'effort': r.effort,
       'format': {'type': 'json_schema', 'schema': schema},
     },
-    'system': [
-      {
-        'type': 'text',
-        'text': system,
-        'cache_control': {'type': 'ephemeral'},
-      },
-    ],
+    'system': system,
     'messages': [
       {'role': 'user', 'content': content},
     ],
   };
 
-  /// Streams (long inputs / no HTTP timeout issues) and returns the decoded
-  /// JSON object from the first text block.
-  Future<Map<String, dynamic>> _json(Map<String, dynamic> body) async {
-    Map<String, dynamic>? message;
-    await for (final ev in _api.stream(
-      body,
-      extraBetas: const [fallbackBeta],
-    )) {
-      if (ev is ClaudeMessageFinished) message = ev.message;
+  /// Sends the request for [r] and returns the decoded JSON object from the
+  /// first text block.
+  Future<Map<String, dynamic>> _json(
+    ClaudeRoute r,
+    String system,
+    List<Map<String, dynamic>> content,
+    Map<String, dynamic> schema,
+  ) async {
+    final m = await _api.create(
+      _body(r, system, content, schema),
+      extraBetas: r.serverFallback ? const [fallbackBeta] : const [],
+    );
+    if (m['usage'] case final Map usage) {
+      await onUsage?.call(
+        r,
+        m['model'] as String? ?? r.model,
+        Map<String, dynamic>.from(usage),
+      );
     }
-    final m = message!;
     switch (m['stop_reason']) {
       case 'refusal':
         throw AiUnavailableException(
@@ -326,12 +385,10 @@ class ClaudeInterviewAi implements InterviewAi {
   @override
   Future<GeneratedQuestion> nextQuestion(InterviewContext ctx) async {
     final j = await _json(
-      _body(
-        question,
-        interviewerSystem,
-        _transcriptBlocks(ctx),
-        questionSchema,
-      ),
+      question,
+      interviewerSystem,
+      _transcriptBlocks(ctx),
+      questionSchema,
     );
     final cat = (j['category'] as String).toLowerCase();
     return (
@@ -351,15 +408,13 @@ class ClaudeInterviewAi implements InterviewAi {
     String question,
     String partialAnswer,
   ) async {
-    final j = await _json(
-      _body(partial, partialSystem, [
-        {'type': 'text', 'text': 'Role: ${ctx.targetRole}'},
-        {
-          'type': 'text',
-          'text': 'Question: $question\nAnswer so far: $partialAnswer',
-        },
-      ], scoresSchema),
-    );
+    final j = await _json(partial, partialSystem, [
+      {'type': 'text', 'text': 'Role: ${ctx.targetRole}'},
+      {
+        'type': 'text',
+        'text': 'Question: $question\nAnswer so far: $partialAnswer',
+      },
+    ], scoresSchema);
     return _scores(j);
   }
 
@@ -369,22 +424,16 @@ class ClaudeInterviewAi implements InterviewAi {
     String question,
     String answer,
   ) async {
-    final j = await _json(
-      _body(evaluation, scoringSystem, [
-        {'type': 'text', 'text': 'Role: ${ctx.targetRole}'},
-        {'type': 'text', 'text': 'Question: $question\nAnswer: $answer'},
-      ], evaluationSchema),
-    );
+    final j = await _json(evaluation, scoringSystem, [
+      {'type': 'text', 'text': 'Role: ${ctx.targetRole}'},
+      {'type': 'text', 'text': 'Question: $question\nAnswer: $answer'},
+    ], evaluationSchema);
     return (
       scores: _scores(j),
       feedback: AnswerFeedback(
         summary: j['summary'] as String,
         strengths: [for (final s in j['strengths'] as List) s as String],
         improvements: [for (final s in j['improvements'] as List) s as String],
-        skillDeltas: {
-          for (final d in (j['skillDeltas'] as List).cast<Map>())
-            d['skill'] as String: (d['delta'] as num).toDouble(),
-        },
       ),
     );
   }
@@ -396,7 +445,7 @@ class ClaudeInterviewAi implements InterviewAi {
   ) async {
     final blocks = _transcriptBlocks(ctx)
       ..add({'type': 'text', 'text': 'Final scores: ${jsonEncode(scores)}'});
-    final j = await _json(_body(summary, summarySystem, blocks, reportSchema));
+    final j = await _json(summary, summarySystem, blocks, reportSchema);
     List<String> strings(String key) => [
       for (final s in j[key] as List) s as String,
     ];
@@ -410,19 +459,17 @@ class ClaudeInterviewAi implements InterviewAi {
 
   @override
   Future<ParsedResume> parseResume(Uint8List pdfBytes) async {
-    final j = await _json(
-      _body(resumeParse, resumeSystem, [
-        {
-          'type': 'document',
-          'source': {
-            'type': 'base64',
-            'media_type': 'application/pdf',
-            'data': base64Encode(pdfBytes), // no newlines
-          },
+    final j = await _json(resumeParse, resumeSystem, [
+      {
+        'type': 'document',
+        'source': {
+          'type': 'base64',
+          'media_type': 'application/pdf',
+          'data': base64Encode(pdfBytes), // no newlines
         },
-        {'type': 'text', 'text': 'Extract the profile.'},
-      ], resumeSchema),
-    );
+      },
+      {'type': 'text', 'text': 'Extract the profile.'},
+    ], resumeSchema);
     return ParsedResume(
       fullName: j['fullName'] as String?,
       headline: j['headline'] as String?,

@@ -1,0 +1,14 @@
+### What the app spent on AI in a time window, for the team's cost screen.
+class: AiCostSummary
+fields:
+  ### Start of the window; null for all time.
+  since: DateTime?
+  total: AiCostLine
+  byFeature: List<AiCostLine>
+  byModel: List<AiCostLine>
+  ### Newest day first.
+  byDay: List<AiCostLine>
+  interviewCount: int
+  averagePerInterviewUsd: double
+  ### Most recent interviews first.
+  recentInterviews: List<AiInterviewCost>

@@ -37,21 +37,22 @@ The interview follows the language of your CV. Claude detects it when it parses 
 The whole backend is Serverpod 4, hosted on Serverpod Cloud.
 
 - **Streaming methods.** The interview is one bidirectional stream (`InterviewEndpoint.conduct`). The app streams answer chunks and "done answering" up, and the server streams questions, live scores, evaluations and the final report down. Both directions are sealed classes defined in `.spy.yaml`, so each side switches over typed events. If the connection drops, reconnecting picks up where you left off.
-- **Models and ORM.** Seven tables (profiles, resumes, interview sessions, questions, answers, skill profiles, challenges) with relations and cascading deletes. Parsed CVs, scores, feedback and the skill graph are stored as jsonb.
-- **pgvector.** Answers have a `Vector(1024)` column with an HNSW cosine index for a "career memory" that finds similar past answers. It needs a Voyage AI key for the embeddings, which we haven't set on the live app yet, so it's off there.
+- **Models and ORM.** Four tables (resumes, interview sessions, questions, answers) with relations and cascading deletes. Parsed CVs, scores and feedback are stored as jsonb.
 - **Auth.** Email auth from `serverpod_auth_idp`. On deployed servers sign-up is blocked in the endpoint, and the admin and jury accounts are created at startup from Serverpod Cloud passwords, so no credentials live in the repo.
-- **File uploads.** CV PDFs go to private cloud storage through upload descriptions, and the server reads them back to send to Claude.
-- **Future calls.** CV parsing and embeddings run as background jobs, since parsing a PDF with Claude can take longer than a normal request. Serverpod Cloud turns future calls off in its managed config, so there they fall back to running in-process.
+- **File uploads.** CV PDFs go to private cloud storage through upload descriptions. The server checks the upload and parses the CV in the background, since that can take longer than a normal request; the app polls until it's done.
 - **Web server.** The server also serves the Flutter web app, plus a small route that tells the app which API URL to use.
-- **Serverpod Cloud.** Hosting, managed Postgres (pgvector works out of the box) and passwords for the API keys.
+- **Serverpod Cloud.** Hosting, managed Postgres and passwords for the API keys.
 - **Tests.** Integration tests with `serverpod_test` against the embedded Postgres, including an end-to-end test that drives the real generated client over the websocket.
 
 ## AI we use
 
-- **Claude** (`claude-opus-5-5`) asks the questions, gives the live scores, evaluates answers, writes the final feedback and parses the CV.
-- **ElevenLabs** (`eleven_v4_turbo`) is the interviewer's voice. The server calls it, so the key never reaches the app.
+- **Claude**, with a model sized to each job:
+  - `claude-sonnet-5-5` asks the questions, evaluates each answer and writes the final feedback.
+  - `claude-haiku-5-5` gives the live scores while you answer (cheap and fast, since it runs every few seconds) and parses the CV.
+- **ElevenLabs** (`eleven_v4_turbo`) is the interviewer's voice. The server calls it, so the key never reaches the app, and only in voice mode.
 - **Speech-to-text** runs in the browser/OS through the `speech_to_text` package.
-- **Voyage AI** for embeddings (optional, see pgvector above).
+
+Every Claude response and voice synthesis is recorded with its token usage and estimated cost. The admin account sees the totals (by feature, model, day and interview) on an AI costs screen in the app.
 - **Claude Code** helped us build it, as our AI coding assistant.
 
 ## Run it yourself
@@ -78,6 +79,6 @@ We've mainly tested it in Chrome on desktop. The app also has the iOS and macOS 
 
 ## Project layout
 
-- `interview_arena_server`: the Serverpod server (endpoints, models, Claude/ElevenLabs/Voyage clients)
+- `interview_arena_server`: the Serverpod server (endpoints, models, Claude/ElevenLabs clients)
 - `interview_arena_client`: the generated client
 - `interview_arena_flutter`: the Flutter app

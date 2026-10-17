@@ -11,20 +11,16 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:interview_arena_client/src/protocol/protocol.dart' as _i8wnw200;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _iacc;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import '../interview/answer_feedback.dart' as _ied67bjz;
 import '../interview/interview_scores.dart' as _i5tfukg1;
 import '../interview/question.dart' as _i6athr3z;
 
-/// A candidate answer. Also the "career memory" row (embedding).
+/// A candidate answer.
 abstract class Answer
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Answer._({
     this.id,
-    required this.authUserId,
-    this.authUser,
     required this.questionId,
     this.question,
     required this.transcript,
@@ -36,8 +32,6 @@ abstract class Answer
 
   factory Answer({
     int? id,
-    required _isc.UuidValue authUserId,
-    _iacc.AuthUser? authUser,
     required int questionId,
     _i6athr3z.Question? question,
     required String transcript,
@@ -50,14 +44,6 @@ abstract class Answer
   factory Answer.fromJson(Map<String, dynamic> jsonSerialization) {
     return Answer(
       id: jsonSerialization['id'] as int?,
-      authUserId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['authUserId'],
-      ),
-      authUser: jsonSerialization['authUser'] == null
-          ? null
-          : _i8wnw200.Protocol().deserialize<_iacc.AuthUser>(
-              jsonSerialization['authUser'],
-            ),
       questionId: jsonSerialization['questionId'] as int,
       question: jsonSerialization['question'] == null
           ? null
@@ -91,11 +77,6 @@ abstract class Answer
   /// the id will be null.
   int? id;
 
-  _isc.UuidValue authUserId;
-
-  /// Denormalised owner so similarity search filters without joins.
-  _iacc.AuthUser? authUser;
-
   int questionId;
 
   _i6athr3z.Question? question;
@@ -115,8 +96,6 @@ abstract class Answer
   @_isc.useResult
   Answer copyWith({
     int? id,
-    _isc.UuidValue? authUserId,
-    _iacc.AuthUser? authUser,
     int? questionId,
     _i6athr3z.Question? question,
     String? transcript,
@@ -130,8 +109,6 @@ abstract class Answer
     return {
       '__className__': 'Answer',
       if (id != null) 'id': id,
-      'authUserId': authUserId.toJson(),
-      if (authUser != null) 'authUser': authUser?.toJson(),
       'questionId': questionId,
       if (question != null) 'question': question?.toJson(),
       'transcript': transcript,
@@ -147,8 +124,6 @@ abstract class Answer
     return {
       '__className__': 'Answer',
       if (id != null) 'id': id,
-      'authUserId': authUserId.toJson(),
-      if (authUser != null) 'authUser': authUser?.toJson(),
       'questionId': questionId,
       if (question != null) 'question': question?.toJsonForProtocol(),
       'transcript': transcript,
@@ -170,8 +145,6 @@ class _Undefined {}
 class _AnswerImpl extends Answer {
   _AnswerImpl({
     int? id,
-    required _isc.UuidValue authUserId,
-    _iacc.AuthUser? authUser,
     required int questionId,
     _i6athr3z.Question? question,
     required String transcript,
@@ -181,8 +154,6 @@ class _AnswerImpl extends Answer {
     DateTime? createdAt,
   }) : super._(
          id: id,
-         authUserId: authUserId,
-         authUser: authUser,
          questionId: questionId,
          question: question,
          transcript: transcript,
@@ -198,8 +169,6 @@ class _AnswerImpl extends Answer {
   @override
   Answer copyWith({
     Object? id = _Undefined,
-    _isc.UuidValue? authUserId,
-    Object? authUser = _Undefined,
     int? questionId,
     Object? question = _Undefined,
     String? transcript,
@@ -210,10 +179,6 @@ class _AnswerImpl extends Answer {
   }) {
     return Answer(
       id: id is int? ? id : this.id,
-      authUserId: authUserId ?? this.authUserId,
-      authUser: authUser is _iacc.AuthUser?
-          ? authUser
-          : this.authUser?.copyWith(),
       questionId: questionId ?? this.questionId,
       question: question is _i6athr3z.Question?
           ? question

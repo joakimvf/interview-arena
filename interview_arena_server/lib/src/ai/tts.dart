@@ -6,6 +6,8 @@ import 'package:serverpod/serverpod.dart';
 
 /// Turns interviewer text into speech (MP3).
 abstract interface class SpeechSynthesizer {
+  /// Recorded with each synthesis in `ai_usage`.
+  String get modelId;
   Future<Uint8List> synthesize(String text);
 }
 
@@ -37,6 +39,7 @@ class ElevenLabsSynthesizer implements SpeechSynthesizer {
   static String? _defaultVoiceId;
 
   final String apiKey;
+  @override
   final String modelId;
   final String? voiceId;
   final http.Client _http;

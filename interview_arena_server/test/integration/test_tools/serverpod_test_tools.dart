@@ -14,20 +14,14 @@
 import 'dart:async' as _ida;
 import 'dart:io' as _idi;
 import 'dart:typed_data' as _idt;
-import 'package:interview_arena_server/src/generated/future_calls.dart'
-    as _ir1xpria;
-import 'package:interview_arena_server/src/generated/future_calls_generated_models/answer_embedding_future_call_embed_model.dart'
-    as _i4lg6cpb;
-import 'package:interview_arena_server/src/generated/future_calls_generated_models/resume_parse_future_call_parse_model.dart'
-    as _ivw3k7bl;
+import 'package:interview_arena_server/src/generated/costs/ai_cost_summary.dart'
+    as _ikt5yfwi;
 import 'package:interview_arena_server/src/generated/interview/events/interview_event.dart'
     as _i7x6g2rt;
 import 'package:interview_arena_server/src/generated/interview/inputs/candidate_input.dart'
     as _i299cc71;
 import 'package:interview_arena_server/src/generated/interview/interview_session.dart'
     as _i7dogz11;
-import 'package:interview_arena_server/src/generated/profile/candidate_profile.dart'
-    as _izfwqi4g;
 import 'package:interview_arena_server/src/generated/resume/resume.dart'
     as _iz94v5mm;
 import 'package:interview_arena_server/src/generated/resume/resume_upload_ticket.dart'
@@ -169,17 +163,15 @@ void withServerpod(
 }
 
 class TestEndpoints {
-  late final futureCalls = _FutureCalls();
-
   late final _EmailIdpEndpoint emailIdp;
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
+  late final _AiCostEndpoint aiCost;
+
   late final _InterviewEndpoint interview;
 
   late final _VoiceEndpoint voice;
-
-  late final _ProfileEndpoint profile;
 
   late final _ResumeEndpoint resume;
 }
@@ -199,6 +191,10 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+    aiCost = _AiCostEndpoint(
+      endpoints,
+      serializationManager,
+    );
     interview = _InterviewEndpoint(
       endpoints,
       serializationManager,
@@ -207,21 +203,11 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
-    profile = _ProfileEndpoint(
-      endpoints,
-      serializationManager,
-    );
     resume = _ResumeEndpoint(
       endpoints,
       serializationManager,
     );
   }
-}
-
-class _FutureCalls {
-  late final answerEmbedding = _AnswerEmbeddingFutureCall();
-
-  late final resumeParse = _ResumeParseFutureCall();
 }
 
 class _EmailIdpEndpoint {
@@ -542,6 +528,76 @@ class _JwtRefreshEndpoint {
   }
 }
 
+class _AiCostEndpoint {
+  _AiCostEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<bool> canView(_ist.TestSessionBuilder sessionBuilder) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiCost',
+            method: 'canView',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiCost',
+          methodName: 'canView',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ikt5yfwi.AiCostSummary> summary(
+    _ist.TestSessionBuilder sessionBuilder,
+    int days,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'aiCost',
+            method: 'summary',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'aiCost',
+          methodName: 'summary',
+          parameters: _ist.testObjectToJson({'days': days}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ikt5yfwi.AiCostSummary>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _InterviewEndpoint {
   _InterviewEndpoint(
     this._endpointDispatch,
@@ -727,84 +783,6 @@ class _VoiceEndpoint {
   }
 }
 
-class _ProfileEndpoint {
-  _ProfileEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
-
-  final _is.EndpointDispatch _endpointDispatch;
-
-  final _is.SerializationManager _serializationManager;
-
-  _ida.Future<_izfwqi4g.CandidateProfile> me(
-    _ist.TestSessionBuilder sessionBuilder,
-  ) async {
-    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
-      var _localUniqueSession =
-          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'profile',
-            method: 'me',
-          );
-      try {
-        var _localCallContext = await _endpointDispatch.getMethodCallContext(
-          createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'profile',
-          methodName: 'me',
-          parameters: _ist.testObjectToJson({}),
-          serializationManager: _serializationManager,
-        );
-        var _localReturnValue =
-            await (_localCallContext.method.call(
-                  _localUniqueSession,
-                  _localCallContext.arguments,
-                )
-                as _ida.Future<_izfwqi4g.CandidateProfile>);
-        return _localReturnValue;
-      } finally {
-        await _localUniqueSession.close();
-      }
-    });
-  }
-
-  _ida.Future<_izfwqi4g.CandidateProfile> updateMe(
-    _ist.TestSessionBuilder sessionBuilder,
-    String? displayName,
-    String? targetRole,
-    double? yearsOfExperience,
-  ) async {
-    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
-      var _localUniqueSession =
-          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'profile',
-            method: 'updateMe',
-          );
-      try {
-        var _localCallContext = await _endpointDispatch.getMethodCallContext(
-          createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'profile',
-          methodName: 'updateMe',
-          parameters: _ist.testObjectToJson({
-            'displayName': displayName,
-            'targetRole': targetRole,
-            'yearsOfExperience': yearsOfExperience,
-          }),
-          serializationManager: _serializationManager,
-        );
-        var _localReturnValue =
-            await (_localCallContext.method.call(
-                  _localUniqueSession,
-                  _localCallContext.arguments,
-                )
-                as _ida.Future<_izfwqi4g.CandidateProfile>);
-        return _localReturnValue;
-      } finally {
-        await _localUniqueSession.close();
-      }
-    });
-  }
-}
-
 class _ResumeEndpoint {
   _ResumeEndpoint(
     this._endpointDispatch,
@@ -971,45 +949,5 @@ class _ResumeEndpoint {
         await _localUniqueSession.close();
       }
     });
-  }
-}
-
-class _AnswerEmbeddingFutureCall {
-  Future<void> embed(
-    _ist.TestSessionBuilder sessionBuilder,
-    int answerId,
-  ) async {
-    var object = _i4lg6cpb.AnswerEmbeddingFutureCallEmbedModel(
-      answerId: answerId,
-    );
-    var _localUniqueSession =
-        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
-    try {
-      await _ir1xpria.AnswerEmbeddingEmbedFutureCall().invoke(
-        _localUniqueSession,
-        object,
-      );
-    } finally {
-      await _localUniqueSession.close();
-    }
-  }
-}
-
-class _ResumeParseFutureCall {
-  Future<void> parse(
-    _ist.TestSessionBuilder sessionBuilder,
-    int resumeId,
-  ) async {
-    var object = _ivw3k7bl.ResumeParseFutureCallParseModel(resumeId: resumeId);
-    var _localUniqueSession =
-        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
-    try {
-      await _ir1xpria.ResumeParseParseFutureCall().invoke(
-        _localUniqueSession,
-        object,
-      );
-    } finally {
-      await _localUniqueSession.close();
-    }
   }
 }

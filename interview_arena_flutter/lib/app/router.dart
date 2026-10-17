@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/client_providers.dart';
 import '../features/auth/sign_in_page.dart';
+import '../features/costs/ai_costs_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/interview/live_interview_screen.dart';
 
@@ -37,6 +38,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) =>
             MaterialPage(key: state.pageKey, child: const HomeScreen()),
         routes: [
+          GoRoute(
+            path: 'costs',
+            pageBuilder: (context, state) =>
+                MaterialPage(key: state.pageKey, child: const AiCostsScreen()),
+          ),
           GoRoute(
             path: 'interview/:id',
             // A hand-typed non-numeric id would otherwise throw in build.

@@ -1,0 +1,13 @@
+### Totals for one group of AI calls (a feature, a model or a day).
+class: AiCostLine
+fields:
+  label: String
+  calls: int
+  inputTokens: int
+  outputTokens: int
+  cacheReadTokens: int
+  cacheWriteTokens: int
+  characters: int
+  costUsd: double
+  ### Calls without a known price (not included in costUsd).
+  unpricedCalls: int

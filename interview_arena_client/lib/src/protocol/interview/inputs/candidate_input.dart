@@ -15,6 +15,7 @@ import '../../protocol.dart' as _iototaiw;
 part 'answer_chunk.dart';
 part 'answer_submitted.dart';
 part 'end_interview.dart';
+part 'voice_mode_changed.dart';
 
 /// Client -> server message on the live interview stream.
 sealed class CandidateInput

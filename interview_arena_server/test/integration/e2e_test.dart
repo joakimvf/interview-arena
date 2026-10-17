@@ -62,7 +62,7 @@ void main() {
 
       setUp(() {
         fake = FakeInterviewAi();
-        interviewAiFactory = (_) => fake;
+        interviewAiFactory = (_, [_]) => fake;
         InterviewEndpoint.partialScoreInterval = Duration.zero;
         client = c.Client('http://localhost:${Serverpod.instance.server.port}/')
           ..authKeyProvider = _FixedKey();
@@ -151,8 +151,8 @@ void main() {
         unawaited(inputs.close());
       });
 
-      test('when a resume PDF is uploaded and completed then the parse future '
-          'call (int param) runs and getResume returns parsedData', () async {
+      test('when a resume PDF is uploaded and completed then the background '
+          'parse runs and getResume returns parsedData', () async {
         final pdf = Uint8List(300 * 1024)
           ..setAll(0, ascii.encode('%PDF-1.7\n'));
         final ticket = await client.resume.createUpload('cv.pdf', pdf.length);
@@ -174,13 +174,6 @@ void main() {
         expect(r.parsedData!.skills.single.name, 'Dart');
         expect(r.parsedData!.experience.single.company, 'ACME');
         expect(fake.parses, 1);
-        final profile = await SkillProfile.db.findFirstRow(
-          sb.build(),
-          where: (t) => t.authUserId.equals(userId),
-        );
-        // Earlier test (rollback disabled) already created 'dart' (35); the resume
-        // seed uses putIfAbsent, so existing evidence wins.
-        expect(profile!.skillGraph['dart']!.level, 35);
         expect(
           (await client.resume.listResumes()).map((x) => x.id),
           contains(ticket.resumeId),
@@ -214,10 +207,5 @@ void main() {
       });
     },
     rollbackDatabase: RollbackDatabase.disabled,
-    configOverride: (config) => config.copyWith(
-      futureCall: const FutureCallConfig(
-        scanInterval: Duration(milliseconds: 200),
-      ),
-    ),
   );
 }

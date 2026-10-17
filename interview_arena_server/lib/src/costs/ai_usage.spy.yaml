@@ -1,0 +1,28 @@
+### One paid AI call (a Claude route or an ElevenLabs synthesis), so the team
+### can see what the app spends. Kept when the user, interview or resume is
+### deleted, so the ids are plain columns without relations.
+class: AiUsage
+table: ai_usage
+serverOnly: true
+fields:
+  createdAt: DateTime, default=now
+  ### question | partial | evaluation | summary | resumeParse | voice
+  feature: String
+  ### Model that answered (after any server-side fallback).
+  model: String
+  authUserId: UuidValue?
+  interviewSessionId: int?
+  resumeId: int?
+  inputTokens: int, default=0
+  outputTokens: int, default=0
+  cacheReadTokens: int, default=0
+  cacheWriteTokens: int, default=0
+  ### Characters synthesized (voice only).
+  characters: int, default=0
+  ### Estimated cost in US dollars at list prices; null when unknown.
+  costUsd: double?
+indexes:
+  ai_usage_created_idx:
+    fields: createdAt
+  ai_usage_interview_idx:
+    fields: interviewSessionId

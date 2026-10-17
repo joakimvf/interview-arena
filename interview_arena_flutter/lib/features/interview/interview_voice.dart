@@ -79,20 +79,28 @@ class InterviewVoice extends ChangeNotifier {
     _committed = '';
     onTranscript('');
     if (!interviewerVoiceAvailable) return startListening();
+    if (await _load(questionId)) await _play();
+  }
+
+  /// Fetches [questionId]'s audio into [_audio]. Returns false, and goes
+  /// back to listening, when there is no audio (no voice configured, or the
+  /// request failed).
+  Future<bool> _load(int questionId) async {
     _set(VoicePhase.preparing);
     try {
       final data = await _client.voice.questionAudio(questionId);
-      if (_disposed || _questionId != questionId) return;
+      if (_disposed || _questionId != questionId) return false;
       if (data == null) {
         interviewerVoiceAvailable = false;
         await startListening();
-        return;
+        return false;
       }
       _audio = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-      await _play();
+      return true;
     } catch (e) {
       debugPrint('Question audio failed: $e');
       if (!_disposed && _questionId == questionId) await startListening();
+      return false;
     }
   }
 
@@ -109,11 +117,18 @@ class InterviewVoice extends ChangeNotifier {
     }
   }
 
-  /// Hear the question again; the answer so far is kept.
-  Future<void> replay() async {
-    if (_audio == null) return;
+  /// Hear [questionId] again; the answer so far is kept. Fetches the audio
+  /// first when the question was shown in typing mode, so it was never played.
+  Future<void> replay(int questionId) async {
+    // Already fetching it: a second tap would play it twice.
+    if (phase == VoicePhase.preparing) return;
     await _stopListening();
     _committed = transcript;
+    if (_audio == null || _questionId != questionId) {
+      _questionId = questionId;
+      _audio = null;
+      if (!await _load(questionId)) return;
+    }
     await _play();
   }
 

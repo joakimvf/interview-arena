@@ -13,14 +13,14 @@
 import 'dart:async' as _ida;
 import 'dart:typed_data' as _idt;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:interview_arena_client/src/protocol/costs/ai_cost_summary.dart'
+    as _iu55fj6k;
 import 'package:interview_arena_client/src/protocol/interview/events/interview_event.dart'
     as _imk1u46l;
 import 'package:interview_arena_client/src/protocol/interview/inputs/candidate_input.dart'
     as _i62x3a2n;
 import 'package:interview_arena_client/src/protocol/interview/interview_session.dart'
     as _igfauqzi;
-import 'package:interview_arena_client/src/protocol/profile/candidate_profile.dart'
-    as _iitch3kn;
 import 'package:interview_arena_client/src/protocol/resume/resume.dart'
     as _imbxkhrz;
 import 'package:interview_arena_client/src/protocol/resume/resume_upload_ticket.dart'
@@ -249,6 +249,32 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
       );
 }
 
+/// The team's view of what the app spends on AI, from `ai_usage`.
+/// Open to the admin scope on deployed servers, and to anyone signed in
+/// during development and tests.
+/// {@category Endpoint}
+class EndpointAiCost extends _isc.EndpointRef {
+  EndpointAiCost(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'aiCost';
+
+  /// Whether the signed-in user may see AI costs (shows the menu entry).
+  _ida.Future<bool> canView() => caller.callServerEndpoint<bool>(
+    'aiCost',
+    'canView',
+    {},
+  );
+
+  /// Spend over the last [days] days, or all time when [days] is 0 or less.
+  _ida.Future<_iu55fj6k.AiCostSummary> summary(int days) =>
+      caller.callServerEndpoint<_iu55fj6k.AiCostSummary>(
+        'aiCost',
+        'summary',
+        {'days': days},
+      );
+}
+
 /// {@category Endpoint}
 class EndpointInterview extends _isc.EndpointRef {
   EndpointInterview(_isc.EndpointCaller caller) : super(caller);
@@ -317,38 +343,8 @@ class EndpointVoice extends _isc.EndpointRef {
       );
 }
 
-/// {@category Endpoint}
-class EndpointProfile extends _isc.EndpointRef {
-  EndpointProfile(_isc.EndpointCaller caller) : super(caller);
-
-  @override
-  String get name => 'profile';
-
-  /// Get-or-create (safety net if the onAfterAuthUserCreated hook is absent).
-  _ida.Future<_iitch3kn.CandidateProfile> me() =>
-      caller.callServerEndpoint<_iitch3kn.CandidateProfile>(
-        'profile',
-        'me',
-        {},
-      );
-
-  _ida.Future<_iitch3kn.CandidateProfile> updateMe(
-    String? displayName,
-    String? targetRole,
-    double? yearsOfExperience,
-  ) => caller.callServerEndpoint<_iitch3kn.CandidateProfile>(
-    'profile',
-    'updateMe',
-    {
-      'displayName': displayName,
-      'targetRole': targetRole,
-      'yearsOfExperience': yearsOfExperience,
-    },
-  );
-}
-
 /// Resume PDF: createUpload -> (client FileUploader) -> completeUpload ->
-/// ResumeParseFutureCall (async) -> client polls getResume.
+/// parse in the background -> client polls getResume.
 /// {@category Endpoint}
 class EndpointResume extends _isc.EndpointRef {
   EndpointResume(_isc.EndpointCaller caller) : super(caller);
@@ -437,9 +433,9 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    aiCost = EndpointAiCost(this);
     interview = EndpointInterview(this);
     voice = EndpointVoice(this);
-    profile = EndpointProfile(this);
     resume = EndpointResume(this);
     modules = Modules(this);
   }
@@ -448,11 +444,11 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
+  late final EndpointAiCost aiCost;
+
   late final EndpointInterview interview;
 
   late final EndpointVoice voice;
-
-  late final EndpointProfile profile;
 
   late final EndpointResume resume;
 
@@ -462,9 +458,9 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'aiCost': aiCost,
     'interview': interview,
     'voice': voice,
-    'profile': profile,
     'resume': resume,
   };
 

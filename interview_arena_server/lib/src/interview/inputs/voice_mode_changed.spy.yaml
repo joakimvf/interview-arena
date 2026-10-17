@@ -1,0 +1,7 @@
+### The candidate chose speaking or typing: sent when the interview begins,
+### on every switch, and again after a reconnect. The server only makes
+### question audio (ElevenLabs) while this is on.
+class: VoiceModeChanged
+extends: CandidateInput
+fields:
+  enabled: bool

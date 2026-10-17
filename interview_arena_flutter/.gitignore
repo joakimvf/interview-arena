@@ -31,6 +31,12 @@
 .pub/
 /build/
 
+# Test coverage
+/coverage/
+
+# flutter migrate
+/migrate_working_dir/
+
 # Web related
 
 # Symbolization related

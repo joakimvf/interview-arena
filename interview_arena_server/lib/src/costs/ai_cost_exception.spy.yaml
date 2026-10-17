@@ -1,0 +1,4 @@
+### Thrown when someone without the admin scope asks for AI costs.
+exception: AiCostAccessException
+fields:
+  reason: String

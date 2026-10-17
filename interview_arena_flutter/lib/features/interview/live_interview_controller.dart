@@ -83,6 +83,10 @@ class LiveInterviewController extends Notifier<LiveInterviewState> {
   var _resumable = false;
   final _prompts = <int, String>{};
 
+  /// Last mode sent to the server; re-sent after a reconnect, since the
+  /// server starts every stream in typing mode.
+  bool? _voiceMode;
+
   @override
   LiveInterviewState build() {
     // build() reruns on reconnect; the server replays question and scores.
@@ -97,6 +101,7 @@ class LiveInterviewController extends Notifier<LiveInterviewState> {
     final client = ref.watch(clientProvider);
     _conn = LiveInterviewConnection(client, interviewSessionId);
     _conn.connect(onEvent: _onEvent, onError: _onError, onDone: _onDone);
+    if (_voiceMode case final enabled?) _conn.voiceMode(enabled: enabled);
     ref.onDispose(() => unawaited(_conn.dispose()));
     unawaited(_loadDetails(client));
     return const LiveInterviewState();
@@ -195,6 +200,13 @@ class LiveInterviewController extends Notifier<LiveInterviewState> {
     _partial = null;
     _emit();
     return true;
+  }
+
+  /// Tells the server whether to prepare spoken questions.
+  void setVoiceMode({required bool enabled}) {
+    if (_voiceMode == enabled) return;
+    _voiceMode = enabled;
+    _conn.voiceMode(enabled: enabled);
   }
 
   void end() {

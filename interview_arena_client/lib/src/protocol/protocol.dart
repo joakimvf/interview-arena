@@ -21,8 +21,10 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'auth/sign_up_closed_exception.dart' as _i8uejmxn;
-import 'challenges/challenge.dart' as _iylq4q0i;
-import 'challenges/challenge_difficulty.dart' as _igs032ca;
+import 'costs/ai_cost_exception.dart' as _ihqm99my;
+import 'costs/ai_cost_line.dart' as _is9tm0e4;
+import 'costs/ai_cost_summary.dart' as _i061j709;
+import 'costs/ai_interview_cost.dart' as _icpn43qs;
 import 'interview/answer.dart' as _ilptq4di;
 import 'interview/answer_feedback.dart' as _iq8f7lpk;
 import 'interview/events/interview_event.dart' as _i9r9cihw;
@@ -34,7 +36,6 @@ import 'interview/interview_session.dart' as _illbuy7a;
 import 'interview/interview_status.dart' as _ifyqp54v;
 import 'interview/question.dart' as _ihpdvrxq;
 import 'interview/question_category.dart' as _i8405n7p;
-import 'profile/candidate_profile.dart' as _i4trz3o8;
 import 'resume/extracted_skill.dart' as _izdd6kyx;
 import 'resume/parsed_resume.dart' as _ivs53uxk;
 import 'resume/resume.dart' as _ipkmgecw;
@@ -42,12 +43,11 @@ import 'resume/resume_exception.dart' as _iqo5w92k;
 import 'resume/resume_parse_status.dart' as _imejjlr6;
 import 'resume/resume_upload_ticket.dart' as _ieef7w2g;
 import 'resume/work_experience.dart' as _iq8k1g78;
-import 'skills/skill_node.dart' as _ifilxtcy;
-import 'skills/skill_profile.dart' as _ioq46cla;
-import 'skills/weakness.dart' as _i7w5oxf5;
 export 'auth/sign_up_closed_exception.dart';
-export 'challenges/challenge.dart';
-export 'challenges/challenge_difficulty.dart';
+export 'costs/ai_cost_exception.dart';
+export 'costs/ai_cost_line.dart';
+export 'costs/ai_cost_summary.dart';
+export 'costs/ai_interview_cost.dart';
 export 'interview/answer.dart';
 export 'interview/answer_feedback.dart';
 export 'interview/events/interview_event.dart';
@@ -59,7 +59,6 @@ export 'interview/interview_session.dart';
 export 'interview/interview_status.dart';
 export 'interview/question.dart';
 export 'interview/question_category.dart';
-export 'profile/candidate_profile.dart';
 export 'resume/extracted_skill.dart';
 export 'resume/parsed_resume.dart';
 export 'resume/resume.dart';
@@ -67,9 +66,6 @@ export 'resume/resume_exception.dart';
 export 'resume/resume_parse_status.dart';
 export 'resume/resume_upload_ticket.dart';
 export 'resume/work_experience.dart';
-export 'skills/skill_node.dart';
-export 'skills/skill_profile.dart';
-export 'skills/weakness.dart';
 export 'client.dart';
 
 class Protocol extends _isc.SerializationManager {
@@ -109,11 +105,17 @@ class Protocol extends _isc.SerializationManager {
     if (t == _i8uejmxn.SignUpClosedException) {
       return _i8uejmxn.SignUpClosedException.fromJson(data) as T;
     }
-    if (t == _iylq4q0i.Challenge) {
-      return _iylq4q0i.Challenge.fromJson(data) as T;
+    if (t == _ihqm99my.AiCostAccessException) {
+      return _ihqm99my.AiCostAccessException.fromJson(data) as T;
     }
-    if (t == _igs032ca.ChallengeDifficulty) {
-      return _igs032ca.ChallengeDifficulty.fromJson(data) as T;
+    if (t == _is9tm0e4.AiCostLine) {
+      return _is9tm0e4.AiCostLine.fromJson(data) as T;
+    }
+    if (t == _i061j709.AiCostSummary) {
+      return _i061j709.AiCostSummary.fromJson(data) as T;
+    }
+    if (t == _icpn43qs.AiInterviewCost) {
+      return _icpn43qs.AiInterviewCost.fromJson(data) as T;
     }
     if (t == _ilptq4di.Answer) {
       return _ilptq4di.Answer.fromJson(data) as T;
@@ -148,6 +150,9 @@ class Protocol extends _isc.SerializationManager {
     if (t == _ipbu4009.EndInterview) {
       return _ipbu4009.EndInterview.fromJson(data) as T;
     }
+    if (t == _ipbu4009.VoiceModeChanged) {
+      return _ipbu4009.VoiceModeChanged.fromJson(data) as T;
+    }
     if (t == _ix0gec48.InterviewAccessException) {
       return _ix0gec48.InterviewAccessException.fromJson(data) as T;
     }
@@ -168,9 +173,6 @@ class Protocol extends _isc.SerializationManager {
     }
     if (t == _i8405n7p.QuestionCategory) {
       return _i8405n7p.QuestionCategory.fromJson(data) as T;
-    }
-    if (t == _i4trz3o8.CandidateProfile) {
-      return _i4trz3o8.CandidateProfile.fromJson(data) as T;
     }
     if (t == _izdd6kyx.ExtractedSkill) {
       return _izdd6kyx.ExtractedSkill.fromJson(data) as T;
@@ -193,28 +195,27 @@ class Protocol extends _isc.SerializationManager {
     if (t == _iq8k1g78.WorkExperience) {
       return _iq8k1g78.WorkExperience.fromJson(data) as T;
     }
-    if (t == _ifilxtcy.SkillNode) {
-      return _ifilxtcy.SkillNode.fromJson(data) as T;
-    }
-    if (t == _ioq46cla.SkillProfile) {
-      return _ioq46cla.SkillProfile.fromJson(data) as T;
-    }
-    if (t == _i7w5oxf5.Weakness) {
-      return _i7w5oxf5.Weakness.fromJson(data) as T;
-    }
     if (t == _isc.getType<_i8uejmxn.SignUpClosedException?>()) {
       return (data != null
               ? _i8uejmxn.SignUpClosedException.fromJson(data)
               : null)
           as T;
     }
-    if (t == _isc.getType<_iylq4q0i.Challenge?>()) {
-      return (data != null ? _iylq4q0i.Challenge.fromJson(data) : null) as T;
-    }
-    if (t == _isc.getType<_igs032ca.ChallengeDifficulty?>()) {
+    if (t == _isc.getType<_ihqm99my.AiCostAccessException?>()) {
       return (data != null
-              ? _igs032ca.ChallengeDifficulty.fromJson(data)
+              ? _ihqm99my.AiCostAccessException.fromJson(data)
               : null)
+          as T;
+    }
+    if (t == _isc.getType<_is9tm0e4.AiCostLine?>()) {
+      return (data != null ? _is9tm0e4.AiCostLine.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i061j709.AiCostSummary?>()) {
+      return (data != null ? _i061j709.AiCostSummary.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_icpn43qs.AiInterviewCost?>()) {
+      return (data != null ? _icpn43qs.AiInterviewCost.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_ilptq4di.Answer?>()) {
@@ -257,6 +258,10 @@ class Protocol extends _isc.SerializationManager {
     if (t == _isc.getType<_ipbu4009.EndInterview?>()) {
       return (data != null ? _ipbu4009.EndInterview.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_ipbu4009.VoiceModeChanged?>()) {
+      return (data != null ? _ipbu4009.VoiceModeChanged.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_ix0gec48.InterviewAccessException?>()) {
       return (data != null
               ? _ix0gec48.InterviewAccessException.fromJson(data)
@@ -286,10 +291,6 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _i8405n7p.QuestionCategory.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_i4trz3o8.CandidateProfile?>()) {
-      return (data != null ? _i4trz3o8.CandidateProfile.fromJson(data) : null)
-          as T;
-    }
     if (t == _isc.getType<_izdd6kyx.ExtractedSkill?>()) {
       return (data != null ? _izdd6kyx.ExtractedSkill.fromJson(data) : null)
           as T;
@@ -316,29 +317,20 @@ class Protocol extends _isc.SerializationManager {
       return (data != null ? _iq8k1g78.WorkExperience.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_ifilxtcy.SkillNode?>()) {
-      return (data != null ? _ifilxtcy.SkillNode.fromJson(data) : null) as T;
+    if (t == List<_is9tm0e4.AiCostLine>) {
+      return (data as List)
+              .map((e) => deserialize<_is9tm0e4.AiCostLine>(e))
+              .toList()
+          as T;
     }
-    if (t == _isc.getType<_ioq46cla.SkillProfile?>()) {
-      return (data != null ? _ioq46cla.SkillProfile.fromJson(data) : null) as T;
-    }
-    if (t == _isc.getType<_i7w5oxf5.Weakness?>()) {
-      return (data != null ? _i7w5oxf5.Weakness.fromJson(data) : null) as T;
+    if (t == List<_icpn43qs.AiInterviewCost>) {
+      return (data as List)
+              .map((e) => deserialize<_icpn43qs.AiInterviewCost>(e))
+              .toList()
+          as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
-    }
-    if (t == _isc.getType<List<String>?>()) {
-      return (data != null
-              ? (data as List).map((e) => deserialize<String>(e)).toList()
-              : null)
-          as T;
-    }
-    if (t == Map<String, double>) {
-      return (data as Map).map(
-            (k, v) => MapEntry(deserialize<String>(k), deserialize<double>(v)),
-          )
-          as T;
     }
     if (t == List<_ihpdvrxq.Question>) {
       return (data as List)
@@ -380,23 +372,11 @@ class Protocol extends _isc.SerializationManager {
               .toList()
           as T;
     }
-    if (t == Map<String, _ifilxtcy.SkillNode>) {
-      return (data as Map).map(
-            (k, v) => MapEntry(
-              deserialize<String>(k),
-              deserialize<_ifilxtcy.SkillNode>(v),
-            ),
-          )
+    if (t == _isc.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
           as T;
-    }
-    if (t == List<_i7w5oxf5.Weakness>) {
-      return (data as List)
-              .map((e) => deserialize<_i7w5oxf5.Weakness>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<int>) {
-      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
     if (t == List<_igfauqzi.InterviewSession>) {
       return (data as List)
@@ -422,8 +402,10 @@ class Protocol extends _isc.SerializationManager {
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i8uejmxn.SignUpClosedException => 'SignUpClosedException',
-      _iylq4q0i.Challenge => 'Challenge',
-      _igs032ca.ChallengeDifficulty => 'ChallengeDifficulty',
+      _ihqm99my.AiCostAccessException => 'AiCostAccessException',
+      _is9tm0e4.AiCostLine => 'AiCostLine',
+      _i061j709.AiCostSummary => 'AiCostSummary',
+      _icpn43qs.AiInterviewCost => 'AiInterviewCost',
       _ilptq4di.Answer => 'Answer',
       _iq8f7lpk.AnswerFeedback => 'AnswerFeedback',
       _i9r9cihw.AnswerEvaluated => 'AnswerEvaluated',
@@ -435,6 +417,7 @@ class Protocol extends _isc.SerializationManager {
       _ipbu4009.AnswerChunk => 'AnswerChunk',
       _ipbu4009.AnswerSubmitted => 'AnswerSubmitted',
       _ipbu4009.EndInterview => 'EndInterview',
+      _ipbu4009.VoiceModeChanged => 'VoiceModeChanged',
       _ix0gec48.InterviewAccessException => 'InterviewAccessException',
       _ihpfwdr6.InterviewReport => 'InterviewReport',
       _i0s2zm9r.InterviewScores => 'InterviewScores',
@@ -442,7 +425,6 @@ class Protocol extends _isc.SerializationManager {
       _ifyqp54v.InterviewStatus => 'InterviewStatus',
       _ihpdvrxq.Question => 'Question',
       _i8405n7p.QuestionCategory => 'QuestionCategory',
-      _i4trz3o8.CandidateProfile => 'CandidateProfile',
       _izdd6kyx.ExtractedSkill => 'ExtractedSkill',
       _ivs53uxk.ParsedResume => 'ParsedResume',
       _ipkmgecw.Resume => 'Resume',
@@ -450,9 +432,6 @@ class Protocol extends _isc.SerializationManager {
       _imejjlr6.ResumeParseStatus => 'ResumeParseStatus',
       _ieef7w2g.ResumeUploadTicket => 'ResumeUploadTicket',
       _iq8k1g78.WorkExperience => 'WorkExperience',
-      _ifilxtcy.SkillNode => 'SkillNode',
-      _ioq46cla.SkillProfile => 'SkillProfile',
-      _i7w5oxf5.Weakness => 'Weakness',
       _ => null,
     };
   }
@@ -472,10 +451,14 @@ class Protocol extends _isc.SerializationManager {
     switch (data) {
       case _i8uejmxn.SignUpClosedException():
         return 'SignUpClosedException';
-      case _iylq4q0i.Challenge():
-        return 'Challenge';
-      case _igs032ca.ChallengeDifficulty():
-        return 'ChallengeDifficulty';
+      case _ihqm99my.AiCostAccessException():
+        return 'AiCostAccessException';
+      case _is9tm0e4.AiCostLine():
+        return 'AiCostLine';
+      case _i061j709.AiCostSummary():
+        return 'AiCostSummary';
+      case _icpn43qs.AiInterviewCost():
+        return 'AiInterviewCost';
       case _ilptq4di.Answer():
         return 'Answer';
       case _iq8f7lpk.AnswerFeedback():
@@ -498,6 +481,8 @@ class Protocol extends _isc.SerializationManager {
         return 'AnswerSubmitted';
       case _ipbu4009.EndInterview():
         return 'EndInterview';
+      case _ipbu4009.VoiceModeChanged():
+        return 'VoiceModeChanged';
       case _ix0gec48.InterviewAccessException():
         return 'InterviewAccessException';
       case _ihpfwdr6.InterviewReport():
@@ -512,8 +497,6 @@ class Protocol extends _isc.SerializationManager {
         return 'Question';
       case _i8405n7p.QuestionCategory():
         return 'QuestionCategory';
-      case _i4trz3o8.CandidateProfile():
-        return 'CandidateProfile';
       case _izdd6kyx.ExtractedSkill():
         return 'ExtractedSkill';
       case _ivs53uxk.ParsedResume():
@@ -528,12 +511,6 @@ class Protocol extends _isc.SerializationManager {
         return 'ResumeUploadTicket';
       case _iq8k1g78.WorkExperience():
         return 'WorkExperience';
-      case _ifilxtcy.SkillNode():
-        return 'SkillNode';
-      case _ioq46cla.SkillProfile():
-        return 'SkillProfile';
-      case _i7w5oxf5.Weakness():
-        return 'Weakness';
     }
     className = _iaic.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -559,11 +536,17 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'SignUpClosedException') {
       return deserialize<_i8uejmxn.SignUpClosedException>(data['data']);
     }
-    if (dataClassName == 'Challenge') {
-      return deserialize<_iylq4q0i.Challenge>(data['data']);
+    if (dataClassName == 'AiCostAccessException') {
+      return deserialize<_ihqm99my.AiCostAccessException>(data['data']);
     }
-    if (dataClassName == 'ChallengeDifficulty') {
-      return deserialize<_igs032ca.ChallengeDifficulty>(data['data']);
+    if (dataClassName == 'AiCostLine') {
+      return deserialize<_is9tm0e4.AiCostLine>(data['data']);
+    }
+    if (dataClassName == 'AiCostSummary') {
+      return deserialize<_i061j709.AiCostSummary>(data['data']);
+    }
+    if (dataClassName == 'AiInterviewCost') {
+      return deserialize<_icpn43qs.AiInterviewCost>(data['data']);
     }
     if (dataClassName == 'Answer') {
       return deserialize<_ilptq4di.Answer>(data['data']);
@@ -598,6 +581,9 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'EndInterview') {
       return deserialize<_ipbu4009.EndInterview>(data['data']);
     }
+    if (dataClassName == 'VoiceModeChanged') {
+      return deserialize<_ipbu4009.VoiceModeChanged>(data['data']);
+    }
     if (dataClassName == 'InterviewAccessException') {
       return deserialize<_ix0gec48.InterviewAccessException>(data['data']);
     }
@@ -619,9 +605,6 @@ class Protocol extends _isc.SerializationManager {
     if (dataClassName == 'QuestionCategory') {
       return deserialize<_i8405n7p.QuestionCategory>(data['data']);
     }
-    if (dataClassName == 'CandidateProfile') {
-      return deserialize<_i4trz3o8.CandidateProfile>(data['data']);
-    }
     if (dataClassName == 'ExtractedSkill') {
       return deserialize<_izdd6kyx.ExtractedSkill>(data['data']);
     }
@@ -642,15 +625,6 @@ class Protocol extends _isc.SerializationManager {
     }
     if (dataClassName == 'WorkExperience') {
       return deserialize<_iq8k1g78.WorkExperience>(data['data']);
-    }
-    if (dataClassName == 'SkillNode') {
-      return deserialize<_ifilxtcy.SkillNode>(data['data']);
-    }
-    if (dataClassName == 'SkillProfile') {
-      return deserialize<_ioq46cla.SkillProfile>(data['data']);
-    }
-    if (dataClassName == 'Weakness') {
-      return deserialize<_i7w5oxf5.Weakness>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
