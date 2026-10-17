@@ -24,7 +24,6 @@ Future<bool> ensureEmailAccount(
     return false;
   }
   await session.db.transaction((transaction) async {
-    // Runs the onAfterAuthUserCreated hook, so the profile row exists too.
     final user = await AuthServices.instance.authUsers.create(
       session,
       transaction: transaction,

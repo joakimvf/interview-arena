@@ -10,7 +10,7 @@ fields:
   status: ResumeParseStatus, default=awaitingUpload
   parsedData: ParsedResume?, serializationDataType=jsonb
   parseError: String?
-  ### Model id that produced parsedData (e.g. claude-opus-5-5).
+  ### Model id that produced parsedData (e.g. claude-haiku-5-5).
   parseModel: String?, scope=serverOnly
   createdAt: DateTime, default=now
   parsedAt: DateTime?

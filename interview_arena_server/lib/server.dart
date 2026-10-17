@@ -6,7 +6,6 @@ import 'package:serverpod_cloud_storage/serverpod_cloud_storage.dart';
 
 import 'src/auth/sign_up_policy.dart';
 import 'src/generated/serverpod.dart';
-import 'src/profile/profile_hooks.dart';
 import 'src/web/routes/app_config_route.dart';
 
 /// The starting point of the Serverpod server.
@@ -34,24 +33,14 @@ void run(List<String> args) async {
         appDisplayName: 'Interview Arena',
       ),
     ],
-    // Create a CandidateProfile row for every new auth user (any IdP).
-    authUsersConfig: const AuthUsersConfig(
-      onAfterAuthUserCreated: createCandidateProfile,
-    ),
   );
 
-  // Configure cloud storage.
-  // This setup works with Serverpod Cloud without extra configuration.
-  // If you want to use a custom provider for cloud storage, replace these
-  // with your preferred provider.
+  // Private cloud storage for uploaded CV PDFs. This setup works with
+  // Serverpod Cloud without extra configuration. Nothing is public, so no
+  // public storage is registered.
   pod.addCloudStorage(
     await ServerpodCloudProvider.private(
       fallback: () => DatabaseCloudStorage('private'),
-    ),
-  );
-  pod.addCloudStorage(
-    await ServerpodCloudProvider.public(
-      fallback: () => DatabaseCloudStorage('public'),
     ),
   );
 

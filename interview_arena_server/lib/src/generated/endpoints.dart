@@ -10,8 +10,6 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:interview_arena_server/src/generated/future_calls.dart'
-    as _ir1xpria;
 import 'package:interview_arena_server/src/generated/interview/inputs/candidate_input.dart'
     as _i299cc71;
 import 'package:serverpod/serverpod.dart' as _is;
@@ -23,9 +21,7 @@ import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
 import '../interview/interview_endpoint.dart' as _ihytjpn7;
 import '../interview/voice_endpoint.dart' as _iuhx5coh;
-import '../profile/profile_endpoint.dart' as _i6ky944g;
 import '../resume/resume_endpoint.dart' as _ii1d9ztk;
-export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -53,12 +49,6 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'voice',
-          null,
-        ),
-      'profile': _i6ky944g.ProfileEndpoint()
-        ..initialize(
-          server,
-          'profile',
           null,
         ),
       'resume': _ii1d9ztk.ResumeEndpoint()
@@ -387,54 +377,6 @@ class Endpoints extends _is.EndpointDispatch {
         ),
       },
     );
-    connectors['profile'] = _is.EndpointConnector(
-      name: 'profile',
-      endpoint: endpoints['profile']!,
-      methodConnectors: {
-        'me': _is.MethodConnector(
-          name: 'me',
-          params: {},
-          call:
-              (
-                _is.Session session,
-                Map<String, dynamic> params,
-              ) async => (endpoints['profile'] as _i6ky944g.ProfileEndpoint).me(
-                session,
-              ),
-        ),
-        'updateMe': _is.MethodConnector(
-          name: 'updateMe',
-          params: {
-            'displayName': _is.ParameterDescription(
-              name: 'displayName',
-              type: _is.getType<String?>(),
-              nullable: true,
-            ),
-            'targetRole': _is.ParameterDescription(
-              name: 'targetRole',
-              type: _is.getType<String?>(),
-              nullable: true,
-            ),
-            'yearsOfExperience': _is.ParameterDescription(
-              name: 'yearsOfExperience',
-              type: _is.getType<double?>(),
-              nullable: true,
-            ),
-          },
-          call:
-              (
-                _is.Session session,
-                Map<String, dynamic> params,
-              ) async =>
-                  (endpoints['profile'] as _i6ky944g.ProfileEndpoint).updateMe(
-                    session,
-                    params['displayName'],
-                    params['targetRole'],
-                    params['yearsOfExperience'],
-                  ),
-        ),
-      },
-    );
     connectors['resume'] = _is.EndpointConnector(
       name: 'resume',
       endpoint: endpoints['resume']!,
@@ -537,10 +479,5 @@ class Endpoints extends _is.EndpointDispatch {
       ..initializeEndpoints(server);
     modules['serverpod_auth_core'] = _iacs.Endpoints()
       ..initializeEndpoints(server);
-  }
-
-  @override
-  _is.FutureCallDispatch? get futureCalls {
-    return _ir1xpria.FutureCalls();
   }
 }

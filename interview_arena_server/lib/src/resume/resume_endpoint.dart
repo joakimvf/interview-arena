@@ -3,13 +3,12 @@ import 'dart:typed_data';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart'; // authUserId extension
 
+import '../ai/interview_ai.dart';
 import '../background.dart';
-import '../generated/future_calls.dart'; // ServerpodFutureCallsGetter
 import '../generated/protocol.dart';
-import 'resume_parse_future_call.dart';
 
 /// Resume PDF: createUpload -> (client FileUploader) -> completeUpload ->
-/// ResumeParseFutureCall (async) -> client polls getResume.
+/// parse in the background -> client polls getResume.
 class ResumeEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
@@ -107,16 +106,45 @@ class ResumeEndpoint extends Endpoint {
       resume.copyWith(status: ResumeParseStatus.parsing, parseError: null),
     );
     // Async: a Claude PDF parse can exceed the client's 20 s call timeout.
-    await scheduleOrRun(
+    // The bytes are already in memory, so the parse doesn't fetch them again.
+    runInBackground(
       session,
-      name: 'Resume $resumeId parse',
-      schedule: () => session.serverpod.futureCalls
-          .callWithDelay(Duration.zero, identifier: 'resume-parse-$resumeId')
-          .resumeParse
-          .parse(resumeId),
-      run: (s) => ResumeParseFutureCall().parse(s, resumeId),
+      'Resume $resumeId parse',
+      (s) => parse(s, resumeId, bytes),
     );
     return parsing;
+  }
+
+  /// Parses [pdf] with Claude and stores the result on the resume. Guarded by
+  /// status == parsing, so a second run is a no-op.
+  static Future<void> parse(
+    Session session,
+    int resumeId,
+    Uint8List pdf,
+  ) async {
+    final resume = await Resume.db.findById(session, resumeId);
+    if (resume == null || resume.status != ResumeParseStatus.parsing) return;
+    try {
+      final parsed = await interviewAiFactory(session).parseResume(pdf);
+      await Resume.db.updateRow(
+        session,
+        resume.copyWith(
+          status: ResumeParseStatus.parsed,
+          parsedData: parsed,
+          parsedAt: DateTime.now().toUtc(),
+          parseModel: ClaudeInterviewAi.resumeParse.model,
+        ),
+      );
+    } catch (e) {
+      session.log('Resume $resumeId parse failed: $e', level: LogLevel.warning);
+      await Resume.db.updateRow(
+        session,
+        resume.copyWith(
+          status: ResumeParseStatus.failed,
+          parseError: e is AiUnavailableException ? e.code : 'parse_failed',
+        ),
+      );
+    }
   }
 
   Future<Resume?> getResume(Session session, int resumeId) async {

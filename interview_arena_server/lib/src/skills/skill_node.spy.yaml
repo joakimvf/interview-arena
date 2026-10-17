@@ -1,9 +1,0 @@
-### One node in the skill graph.
-class: SkillNode
-fields:
-  ### 0-100 proficiency estimate.
-  level: double
-  evidenceCount: int, default=0
-  lastAssessedAt: DateTime?
-  ### Names of related skills (graph edges).
-  related: List<String>

@@ -31,8 +31,9 @@ class _LiveInterviewScreenState extends ConsumerState<LiveInterviewScreen> {
   var _shownAt = DateTime.now();
   var _lastPartialAt = DateTime.fromMillisecondsSinceEpoch(0);
 
-  /// The server only scores partials every few seconds; don't flood it.
-  static const _partialEvery = Duration(milliseconds: 1500);
+  /// The server scores a partial answer at most every 15 s; sending more
+  /// often than this only adds traffic it throws away.
+  static const _partialEvery = Duration(seconds: 5);
 
   @override
   void initState() {

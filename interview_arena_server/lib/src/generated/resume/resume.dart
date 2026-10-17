@@ -111,7 +111,7 @@ abstract class Resume implements _is.TableRow<int?>, _is.ProtocolSerialization {
 
   String? parseError;
 
-  /// Model id that produced parsedData (e.g. claude-opus-5-5).
+  /// Model id that produced parsedData (e.g. claude-haiku-5-5).
   String? parseModel;
 
   DateTime createdAt;
@@ -401,7 +401,7 @@ class ResumeTable extends _is.Table<int?> {
 
   late final _is.ColumnString parseError;
 
-  /// Model id that produced parsedData (e.g. claude-opus-5-5).
+  /// Model id that produced parsedData (e.g. claude-haiku-5-5).
   late final _is.ColumnString parseModel;
 
   late final _is.ColumnDateTime createdAt;

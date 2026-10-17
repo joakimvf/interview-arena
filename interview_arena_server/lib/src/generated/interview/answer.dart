@@ -14,55 +14,37 @@
 import 'package:interview_arena_server/src/generated/protocol.dart'
     as _iq9nucou;
 import 'package:serverpod/serverpod.dart' as _is;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _iacs;
 import '../interview/answer_feedback.dart' as _ied67bjz;
 import '../interview/interview_scores.dart' as _i5tfukg1;
 import '../interview/question.dart' as _i6athr3z;
 
-/// A candidate answer. Also the "career memory" row (embedding).
+/// A candidate answer.
 abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
   Answer._({
     this.id,
-    required this.authUserId,
-    this.authUser,
     required this.questionId,
     this.question,
     required this.transcript,
     this.answerDuration,
     this.scores,
     this.feedback,
-    this.embedding,
-    this.embeddingModel,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Answer({
     int? id,
-    required _is.UuidValue authUserId,
-    _iacs.AuthUser? authUser,
     required int questionId,
     _i6athr3z.Question? question,
     required String transcript,
     Duration? answerDuration,
     _i5tfukg1.InterviewScores? scores,
     _ied67bjz.AnswerFeedback? feedback,
-    _is.Vector? embedding,
-    String? embeddingModel,
     DateTime? createdAt,
   }) = _AnswerImpl;
 
   factory Answer.fromJson(Map<String, dynamic> jsonSerialization) {
     return Answer(
       id: jsonSerialization['id'] as int?,
-      authUserId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['authUserId'],
-      ),
-      authUser: jsonSerialization['authUser'] == null
-          ? null
-          : _iq9nucou.Protocol().deserialize<_iacs.AuthUser>(
-              jsonSerialization['authUser'],
-            ),
       questionId: jsonSerialization['questionId'] as int,
       question: jsonSerialization['question'] == null
           ? null
@@ -85,10 +67,6 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
           : _iq9nucou.Protocol().deserialize<_ied67bjz.AnswerFeedback>(
               jsonSerialization['feedback'],
             ),
-      embedding: jsonSerialization['embedding'] == null
-          ? null
-          : _is.VectorJsonExtension.fromJson(jsonSerialization['embedding']),
-      embeddingModel: jsonSerialization['embeddingModel'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -102,11 +80,6 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
   @override
   int? id;
 
-  _is.UuidValue authUserId;
-
-  /// Denormalised owner so similarity search filters without joins.
-  _iacs.AuthUser? authUser;
-
   int questionId;
 
   _i6athr3z.Question? question;
@@ -119,12 +92,6 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
 
   _ied67bjz.AnswerFeedback? feedback;
 
-  /// pgvector embedding (voyage-4 @ 1024 dims). Server-only.
-  _is.Vector? embedding;
-
-  /// Set together with embedding: which model produced it (idempotency check).
-  String? embeddingModel;
-
   DateTime createdAt;
 
   @override
@@ -135,16 +102,12 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
   @_is.useResult
   Answer copyWith({
     int? id,
-    _is.UuidValue? authUserId,
-    _iacs.AuthUser? authUser,
     int? questionId,
     _i6athr3z.Question? question,
     String? transcript,
     Duration? answerDuration,
     _i5tfukg1.InterviewScores? scores,
     _ied67bjz.AnswerFeedback? feedback,
-    _is.Vector? embedding,
-    String? embeddingModel,
     DateTime? createdAt,
   });
   @override
@@ -152,16 +115,12 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
     return {
       '__className__': 'Answer',
       if (id != null) 'id': id,
-      'authUserId': authUserId.toJson(),
-      if (authUser != null) 'authUser': authUser?.toJson(),
       'questionId': questionId,
       if (question != null) 'question': question?.toJson(),
       'transcript': transcript,
       if (answerDuration != null) 'answerDuration': answerDuration?.toJson(),
       if (scores != null) 'scores': scores?.toJson(),
       if (feedback != null) 'feedback': feedback?.toJson(),
-      if (embedding != null) 'embedding': embedding?.toJson(),
-      if (embeddingModel != null) 'embeddingModel': embeddingModel,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -171,8 +130,6 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
     return {
       '__className__': 'Answer',
       if (id != null) 'id': id,
-      'authUserId': authUserId.toJson(),
-      if (authUser != null) 'authUser': authUser?.toJson(),
       'questionId': questionId,
       if (question != null) 'question': question?.toJsonForProtocol(),
       'transcript': transcript,
@@ -183,14 +140,8 @@ abstract class Answer implements _is.TableRow<int?>, _is.ProtocolSerialization {
     };
   }
 
-  static AnswerInclude include({
-    _iacs.AuthUserInclude? authUser,
-    _i6athr3z.QuestionInclude? question,
-  }) {
-    return AnswerInclude._(
-      authUser: authUser,
-      question: question,
-    );
+  static AnswerInclude include({_i6athr3z.QuestionInclude? question}) {
+    return AnswerInclude._(question: question);
   }
 
   static AnswerIncludeList includeList({
@@ -222,29 +173,21 @@ class _Undefined {}
 class _AnswerImpl extends Answer {
   _AnswerImpl({
     int? id,
-    required _is.UuidValue authUserId,
-    _iacs.AuthUser? authUser,
     required int questionId,
     _i6athr3z.Question? question,
     required String transcript,
     Duration? answerDuration,
     _i5tfukg1.InterviewScores? scores,
     _ied67bjz.AnswerFeedback? feedback,
-    _is.Vector? embedding,
-    String? embeddingModel,
     DateTime? createdAt,
   }) : super._(
          id: id,
-         authUserId: authUserId,
-         authUser: authUser,
          questionId: questionId,
          question: question,
          transcript: transcript,
          answerDuration: answerDuration,
          scores: scores,
          feedback: feedback,
-         embedding: embedding,
-         embeddingModel: embeddingModel,
          createdAt: createdAt,
        );
 
@@ -254,24 +197,16 @@ class _AnswerImpl extends Answer {
   @override
   Answer copyWith({
     Object? id = _Undefined,
-    _is.UuidValue? authUserId,
-    Object? authUser = _Undefined,
     int? questionId,
     Object? question = _Undefined,
     String? transcript,
     Object? answerDuration = _Undefined,
     Object? scores = _Undefined,
     Object? feedback = _Undefined,
-    Object? embedding = _Undefined,
-    Object? embeddingModel = _Undefined,
     DateTime? createdAt,
   }) {
     return Answer(
       id: id is int? ? id : this.id,
-      authUserId: authUserId ?? this.authUserId,
-      authUser: authUser is _iacs.AuthUser?
-          ? authUser
-          : this.authUser?.copyWith(),
       questionId: questionId ?? this.questionId,
       question: question is _i6athr3z.Question?
           ? question
@@ -286,10 +221,6 @@ class _AnswerImpl extends Answer {
       feedback: feedback is _ied67bjz.AnswerFeedback?
           ? feedback
           : this.feedback?.copyWith(),
-      embedding: embedding is _is.Vector? ? embedding : this.embedding?.clone(),
-      embeddingModel: embeddingModel is String?
-          ? embeddingModel
-          : this.embeddingModel,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -297,13 +228,6 @@ class _AnswerImpl extends Answer {
 
 class AnswerUpdateTable extends _is.UpdateTable<AnswerTable> {
   AnswerUpdateTable(super.table);
-
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> authUserId(
-    _is.UuidValue value,
-  ) => _is.ColumnValue(
-    table.authUserId,
-    value,
-  );
 
   _is.ColumnValue<int, int> questionId(int value) => _is.ColumnValue(
     table.questionId,
@@ -335,18 +259,6 @@ class AnswerUpdateTable extends _is.UpdateTable<AnswerTable> {
     value,
   );
 
-  _is.ColumnValue<_is.Vector, _is.Vector> embedding(_is.Vector? value) =>
-      _is.ColumnValue(
-        table.embedding,
-        value,
-      );
-
-  _is.ColumnValue<String, String> embeddingModel(String? value) =>
-      _is.ColumnValue(
-        table.embeddingModel,
-        value,
-      );
-
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
         table.createdAt,
@@ -357,10 +269,6 @@ class AnswerUpdateTable extends _is.UpdateTable<AnswerTable> {
 class AnswerTable extends _is.Table<int?> {
   AnswerTable({super.tableRelation}) : super(tableName: 'answer') {
     updateTable = AnswerUpdateTable(this);
-    authUserId = _is.ColumnUuid(
-      'authUserId',
-      this,
-    );
     questionId = _is.ColumnInt(
       'questionId',
       this,
@@ -381,15 +289,6 @@ class AnswerTable extends _is.Table<int?> {
       'feedback',
       this,
     );
-    embedding = _is.ColumnVector(
-      'embedding',
-      this,
-      dimension: 1024,
-    );
-    embeddingModel = _is.ColumnString(
-      'embeddingModel',
-      this,
-    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -398,11 +297,6 @@ class AnswerTable extends _is.Table<int?> {
   }
 
   late final AnswerUpdateTable updateTable;
-
-  late final _is.ColumnUuid authUserId;
-
-  /// Denormalised owner so similarity search filters without joins.
-  _iacs.AuthUserTable? _authUser;
 
   late final _is.ColumnInt questionId;
 
@@ -416,26 +310,7 @@ class AnswerTable extends _is.Table<int?> {
 
   late final _is.ColumnStructured<_ied67bjz.AnswerFeedback> feedback;
 
-  /// pgvector embedding (voyage-4 @ 1024 dims). Server-only.
-  late final _is.ColumnVector embedding;
-
-  /// Set together with embedding: which model produced it (idempotency check).
-  late final _is.ColumnString embeddingModel;
-
   late final _is.ColumnDateTime createdAt;
-
-  _iacs.AuthUserTable get authUser {
-    if (_authUser != null) return _authUser!;
-    _authUser = _is.createRelationTable(
-      relationFieldName: 'authUser',
-      field: Answer.t.authUserId,
-      foreignField: _iacs.AuthUser.t.id,
-      tableRelation: tableRelation,
-      createTable: (foreignTableRelation) =>
-          _iacs.AuthUserTable(tableRelation: foreignTableRelation),
-    );
-    return _authUser!;
-  }
 
   _i6athr3z.QuestionTable get question {
     if (_question != null) return _question!;
@@ -453,22 +328,16 @@ class AnswerTable extends _is.Table<int?> {
   @override
   List<_is.Column> get columns => [
     id,
-    authUserId,
     questionId,
     transcript,
     answerDuration,
     scores,
     feedback,
-    embedding,
-    embeddingModel,
     createdAt,
   ];
 
   @override
   _is.Table? getRelationTable(String relationField) {
-    if (relationField == 'authUser') {
-      return authUser;
-    }
     if (relationField == 'question') {
       return question;
     }
@@ -477,23 +346,14 @@ class AnswerTable extends _is.Table<int?> {
 }
 
 class AnswerInclude extends _is.IncludeObject {
-  AnswerInclude._({
-    _iacs.AuthUserInclude? authUser,
-    _i6athr3z.QuestionInclude? question,
-  }) {
-    _authUser = authUser;
+  AnswerInclude._({_i6athr3z.QuestionInclude? question}) {
     _question = question;
   }
-
-  _iacs.AuthUserInclude? _authUser;
 
   _i6athr3z.QuestionInclude? _question;
 
   @override
-  Map<String, _is.Include?> get includes => {
-    'authUser': _authUser,
-    'question': _question,
-  };
+  Map<String, _is.Include?> get includes => {'question': _question};
 
   @override
   _is.Table<int?> get table => Answer.t;
@@ -923,29 +783,6 @@ class AnswerRepository {
 
 class AnswerAttachRowRepository {
   const AnswerAttachRowRepository._();
-
-  /// Creates a relation between the given [Answer] and [AuthUser]
-  /// by setting the [Answer]'s foreign key `authUserId` to refer to the [AuthUser].
-  Future<void> authUser(
-    _is.DatabaseSession session,
-    Answer answer,
-    _iacs.AuthUser authUser, {
-    _is.Transaction? transaction,
-  }) async {
-    if (answer.id == null) {
-      throw ArgumentError.notNull('answer.id');
-    }
-    if (authUser.id == null) {
-      throw ArgumentError.notNull('authUser.id');
-    }
-
-    var $answer = answer.copyWith(authUserId: authUser.id);
-    await session.db.updateRow<Answer>(
-      $answer,
-      columns: [Answer.t.authUserId],
-      transaction: transaction,
-    );
-  }
 
   /// Creates a relation between the given [Answer] and [Question]
   /// by setting the [Answer]'s foreign key `questionId` to refer to the [Question].

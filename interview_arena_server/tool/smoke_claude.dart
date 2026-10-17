@@ -15,7 +15,16 @@ Future<void> main(List<String> args) async {
     stderr.writeln('Set ANTHROPIC_API_KEY.');
     exit(64);
   }
-  final ai = ClaudeInterviewAi(ClaudeHttpClient(apiKey: key));
+  final ai = ClaudeInterviewAi(
+    ClaudeHttpClient(apiKey: key),
+    // Same line the server logs per response.
+    onUsage: (route, model, usage) => stdout.writeln(
+      'claude ${route.name} model=$model '
+      'in=${usage['input_tokens']} out=${usage['output_tokens']} '
+      'cacheRead=${usage['cache_read_input_tokens'] ?? 0} '
+      'cacheWrite=${usage['cache_creation_input_tokens'] ?? 0}',
+    ),
+  );
   final parseOnly = args.contains('--parse-only');
   final files = args.where((a) => a != '--parse-only').toList();
 

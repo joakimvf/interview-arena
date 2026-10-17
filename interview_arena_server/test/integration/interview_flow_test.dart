@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:interview_arena_server/src/ai/embeddings.dart';
+import 'dart:typed_data';
+
 import 'package:interview_arena_server/src/ai/interview_ai.dart';
+import 'package:interview_arena_server/src/ai/tts.dart';
 import 'package:interview_arena_server/src/generated/protocol.dart';
-import 'package:interview_arena_server/src/interview/career_memory.dart';
 import 'package:interview_arena_server/src/interview/interview_endpoint.dart';
-import 'package:serverpod/protocol.dart' show FutureCallEntry;
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart' show AuthUsers;
 import 'package:test/test.dart';
@@ -31,6 +31,8 @@ void main() {
       fake = FakeInterviewAi();
       interviewAiFactory = (_) => fake;
       InterviewEndpoint.partialScoreInterval = Duration.zero;
+      InterviewEndpoint.minNewPartialChars = 120;
+      speechSynthesizerFactory = (_) => null;
       userId = (await const AuthUsers().create(sb.build())).id;
       authed = sb.copyWith(
         authentication: AuthenticationOverride.authenticationInfo(
@@ -120,24 +122,9 @@ void main() {
         expect(s.overallScore, 50);
         expect(s.questions, hasLength(2));
         final a1 = s.questions!.first.answers!.single;
-        expect(a1.feedback!.skillDeltas, {'Dart': -15.0});
+        expect(a1.feedback!.summary, 'ok');
         expect(a1.scores!.communication, 70);
         expect(a1.answerDuration, const Duration(seconds: 42));
-
-        final profile = await SkillProfile.db.findFirstRow(
-          sb.build(),
-          where: (t) => t.authUserId.equals(userId),
-        );
-        expect(profile!.sessionsCompleted, 1);
-        expect(profile.skillGraph['dart']!.level, 20); // 50 - 15 - 15
-        expect(profile.weaknesses.single.skill, 'dart');
-        expect(profile.weaknesses.single.exampleAnswerIds, hasLength(2));
-
-        final embedRows = await FutureCallEntry.db.count(
-          sb.build(),
-          where: (t) => t.identifier.like('embed-%'),
-        );
-        expect(embedRows, 2);
         await inputs.close();
       },
     );
@@ -224,52 +211,76 @@ void main() {
       unawaited(inputs.close());
     });
 
-    test('when the embedding future call runs then career memory finds the '
-        'answer for its owner only', () async {
-      final embedder = FakeEmbedder();
-      embeddingClientFactory = (_) => embedder;
-      final session = sb.build();
-      final s = await InterviewSession.db.insertRow(
-        session,
-        InterviewSession(authUserId: userId, targetRole: 'Backend'),
+    test('when a partial answer grows by less than minNewPartialChars '
+        'then it is not scored again', () async {
+      final interview = await endpoints.interview.start(
+        authed,
+        'Backend',
+        null,
       );
-      final q = await Question.db.insertRow(
-        session,
-        Question(
-          interviewSessionId: s.id!,
-          orderIndex: 0,
-          category: QuestionCategory.technical,
-          prompt: 'p',
-          targetSkills: [],
-        ),
-      );
-      final a = await Answer.db.insertRow(
-        session,
-        Answer(authUserId: userId, questionId: q.id!, transcript: 't'),
-      );
-      await endpoints.futureCalls.answerEmbedding.embed(sb, a.id!);
-      await endpoints.futureCalls.answerEmbedding.embed(
-        sb,
-        a.id!,
-      ); // idempotent
-      expect(embedder.calls, 1);
-      final read = await Answer.db.findById(session, a.id!);
-      expect(read!.embedding!.length, embeddingDimension);
-      expect(read.embeddingModel, 'fake-embed');
+      final inputs = StreamController<CandidateInput>();
+      final received = <InterviewEvent>[];
+      final sub = endpoints.interview
+          .conduct(authed, interview.id!, inputs.stream)
+          .listen(received.add);
+      await waitFor(() => received.whereType<QuestionAsked>().isNotEmpty);
+      final q = received.whereType<QuestionAsked>().single.questionId;
+      AnswerChunk chunk(int seq, int length) =>
+          AnswerChunk(clientSeq: seq, questionId: q, textSoFar: 'x' * length);
 
-      final hits = await CareerMemory.nearestAnswers(
-        session,
-        Vector(fakeVector(0)),
-        authUserId: userId,
-        maxDistance: 0.1,
+      inputs.add(chunk(1, 79)); // below minPartialChars
+      inputs.add(chunk(2, 80)); // first score for this question
+      await waitFor(() => fake.partials == 1);
+      inputs.add(chunk(3, 199)); // only 119 new characters
+      inputs.add(chunk(4, 200)); // 120 new characters
+      await waitFor(() => fake.partials == 2);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(fake.partials, 2);
+      await sub.cancel();
+      unawaited(inputs.close());
+    });
+
+    test('when the client never asks for question audio (typing mode) then '
+        'the next question is not synthesized, and in voice mode it is '
+        'prefetched', () async {
+      final tts = _CountingSynthesizer();
+      speechSynthesizerFactory = (_) => tts;
+      final interview = await endpoints.interview.start(
+        authed,
+        'Backend',
+        null,
       );
-      expect(hits.map((h) => h.id), [a.id]);
-      final none = await CareerMemory.nearestAnswers(
-        session,
-        Vector(fakeVector(0)),
-        authUserId: (await const AuthUsers().create(session)).id,
-      );
-      expect(none, isEmpty);
+      final inputs = StreamController<CandidateInput>();
+      final received = <InterviewEvent>[];
+      final sub = endpoints.interview
+          .conduct(authed, interview.id!, inputs.stream)
+          .listen(received.add);
+      Future<QuestionAsked> answerAndWaitForNext(int seq) async {
+        final asked = received.whereType<QuestionAsked>();
+        final count = asked.length;
+        inputs.add(
+          AnswerSubmitted(
+            clientSeq: seq,
+            questionId: asked.last.questionId,
+            transcript: 'answer $seq',
+          ),
+        );
+        await waitFor(() => asked.length == count + 1);
+        return asked.last;
+      }
+
+      await waitFor(() => received.whereType<QuestionAsked>().isNotEmpty);
+      final q2 = await answerAndWaitForNext(1); // typing: no audio for Q1
+      expect(tts.calls, 0);
+
+      await endpoints.voice.questionAudio(authed, q2.questionId); // voice on
+      expect(tts.calls, 1);
+      final q3 = await answerAndWaitForNext(2);
+      await waitFor(() => tts.calls == 2); // Q3 prefetched
+      await endpoints.voice.questionAudio(authed, q3.questionId);
+      expect(tts.calls, 2); // served from the prefetch
+      await sub.cancel();
+      unawaited(inputs.close());
     });
 
     test('when an auth user is deleted then all owned rows cascade and a '
@@ -315,4 +326,13 @@ void main() {
       );
     });
   });
+}
+
+class _CountingSynthesizer implements SpeechSynthesizer {
+  int calls = 0;
+  @override
+  Future<Uint8List> synthesize(String text) async {
+    calls++;
+    return Uint8List.fromList([1, 2, 3]);
+  }
 }

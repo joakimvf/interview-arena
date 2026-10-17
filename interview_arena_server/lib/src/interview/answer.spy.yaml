@@ -1,28 +1,13 @@
-### A candidate answer. Also the "career memory" row (embedding).
+### A candidate answer.
 class: Answer
 table: answer
 fields:
-  ### Denormalised owner so similarity search filters without joins.
-  authUser: module:serverpod_auth_core:AuthUser?, relation(onDelete=Cascade)
   question: Question?, relation(name=question_answers, onDelete=Cascade)
   transcript: String
   answerDuration: Duration?
   scores: InterviewScores?, serializationDataType=jsonb
   feedback: AnswerFeedback?, serializationDataType=jsonb
-  ### pgvector embedding (voyage-4 @ 1024 dims). Server-only.
-  embedding: Vector(1024)?, scope=serverOnly
-  ### Set together with embedding: which model produced it (idempotency check).
-  embeddingModel: String?, scope=serverOnly
   createdAt: DateTime, default=now
 indexes:
   answer_question_idx:
     fields: questionId
-  answer_user_created_idx:
-    fields: authUserId, createdAt
-  answer_embedding_hnsw_idx:
-    fields: embedding
-    type: hnsw
-    distanceFunction: cosine
-    parameters:
-      m: 16
-      ef_construction: 64

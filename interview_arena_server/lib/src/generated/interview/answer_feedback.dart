@@ -21,14 +21,12 @@ abstract class AnswerFeedback
     required this.summary,
     required this.strengths,
     required this.improvements,
-    required this.skillDeltas,
   });
 
   factory AnswerFeedback({
     required String summary,
     required List<String> strengths,
     required List<String> improvements,
-    required Map<String, double> skillDeltas,
   }) = _AnswerFeedbackImpl;
 
   factory AnswerFeedback.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -40,9 +38,6 @@ abstract class AnswerFeedback
       improvements: _iq9nucou.Protocol().deserialize<List<String>>(
         jsonSerialization['improvements'],
       ),
-      skillDeltas: _iq9nucou.Protocol().deserialize<Map<String, double>>(
-        jsonSerialization['skillDeltas'],
-      ),
     );
   }
 
@@ -52,9 +47,6 @@ abstract class AnswerFeedback
 
   List<String> improvements;
 
-  /// Skill name -> delta applied to the skill graph.
-  Map<String, double> skillDeltas;
-
   /// Returns a shallow copy of this [AnswerFeedback]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -62,7 +54,6 @@ abstract class AnswerFeedback
     String? summary,
     List<String>? strengths,
     List<String>? improvements,
-    Map<String, double>? skillDeltas,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -71,7 +62,6 @@ abstract class AnswerFeedback
       'summary': summary,
       'strengths': strengths.toJson(),
       'improvements': improvements.toJson(),
-      'skillDeltas': skillDeltas.toJson(),
     };
   }
 
@@ -82,7 +72,6 @@ abstract class AnswerFeedback
       'summary': summary,
       'strengths': strengths.toJson(),
       'improvements': improvements.toJson(),
-      'skillDeltas': skillDeltas.toJson(),
     };
   }
 
@@ -97,12 +86,10 @@ class _AnswerFeedbackImpl extends AnswerFeedback {
     required String summary,
     required List<String> strengths,
     required List<String> improvements,
-    required Map<String, double> skillDeltas,
   }) : super._(
          summary: summary,
          strengths: strengths,
          improvements: improvements,
-         skillDeltas: skillDeltas,
        );
 
   /// Returns a shallow copy of this [AnswerFeedback]
@@ -113,23 +100,11 @@ class _AnswerFeedbackImpl extends AnswerFeedback {
     String? summary,
     List<String>? strengths,
     List<String>? improvements,
-    Map<String, double>? skillDeltas,
   }) {
     return AnswerFeedback(
       summary: summary ?? this.summary,
       strengths: strengths ?? this.strengths.map((e0) => e0).toList(),
       improvements: improvements ?? this.improvements.map((e0) => e0).toList(),
-      skillDeltas:
-          skillDeltas ??
-          this.skillDeltas.map(
-            (
-              key0,
-              value0,
-            ) => MapEntry(
-              key0,
-              value0,
-            ),
-          ),
     );
   }
 }

@@ -16,9 +16,6 @@ interview:
   - conduct:
 voice:
   - questionAudio:
-profile:
-  - me:
-  - updateMe:
 resume:
   - createUpload:
   - completeUpload:

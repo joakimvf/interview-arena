@@ -19,8 +19,6 @@ import 'package:interview_arena_client/src/protocol/interview/inputs/candidate_i
     as _i62x3a2n;
 import 'package:interview_arena_client/src/protocol/interview/interview_session.dart'
     as _igfauqzi;
-import 'package:interview_arena_client/src/protocol/profile/candidate_profile.dart'
-    as _iitch3kn;
 import 'package:interview_arena_client/src/protocol/resume/resume.dart'
     as _imbxkhrz;
 import 'package:interview_arena_client/src/protocol/resume/resume_upload_ticket.dart'
@@ -317,38 +315,8 @@ class EndpointVoice extends _isc.EndpointRef {
       );
 }
 
-/// {@category Endpoint}
-class EndpointProfile extends _isc.EndpointRef {
-  EndpointProfile(_isc.EndpointCaller caller) : super(caller);
-
-  @override
-  String get name => 'profile';
-
-  /// Get-or-create (safety net if the onAfterAuthUserCreated hook is absent).
-  _ida.Future<_iitch3kn.CandidateProfile> me() =>
-      caller.callServerEndpoint<_iitch3kn.CandidateProfile>(
-        'profile',
-        'me',
-        {},
-      );
-
-  _ida.Future<_iitch3kn.CandidateProfile> updateMe(
-    String? displayName,
-    String? targetRole,
-    double? yearsOfExperience,
-  ) => caller.callServerEndpoint<_iitch3kn.CandidateProfile>(
-    'profile',
-    'updateMe',
-    {
-      'displayName': displayName,
-      'targetRole': targetRole,
-      'yearsOfExperience': yearsOfExperience,
-    },
-  );
-}
-
 /// Resume PDF: createUpload -> (client FileUploader) -> completeUpload ->
-/// ResumeParseFutureCall (async) -> client polls getResume.
+/// parse in the background -> client polls getResume.
 /// {@category Endpoint}
 class EndpointResume extends _isc.EndpointRef {
   EndpointResume(_isc.EndpointCaller caller) : super(caller);
@@ -439,7 +407,6 @@ class Client extends _isc.ServerpodClientShared {
     jwtRefresh = EndpointJwtRefresh(this);
     interview = EndpointInterview(this);
     voice = EndpointVoice(this);
-    profile = EndpointProfile(this);
     resume = EndpointResume(this);
     modules = Modules(this);
   }
@@ -452,8 +419,6 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointVoice voice;
 
-  late final EndpointProfile profile;
-
   late final EndpointResume resume;
 
   late final Modules modules;
@@ -464,7 +429,6 @@ class Client extends _isc.ServerpodClientShared {
     'jwtRefresh': jwtRefresh,
     'interview': interview,
     'voice': voice,
-    'profile': profile,
     'resume': resume,
   };
 

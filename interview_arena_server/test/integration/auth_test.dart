@@ -1,6 +1,3 @@
-import 'package:interview_arena_server/src/generated/protocol.dart';
-import 'package:interview_arena_server/src/profile/profile_hooks.dart';
-import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'package:test/test.dart';
@@ -13,7 +10,7 @@ void main() {
   // supported when database rollbacks are enabled").
   for (final rollback in [RollbackDatabase.disabled]) {
     withServerpod(
-      'Given email registration with the profile hook (rollback ${rollback.name})',
+      'Given email registration (rollback ${rollback.name})',
       (sessionBuilder, endpoints) {
         String? code;
 
@@ -43,15 +40,11 @@ void main() {
                     },
               ),
             ],
-            authUsersConfig: const AuthUsersConfig(
-              onAfterAuthUserCreated: createCandidateProfile,
-            ),
           );
         });
 
         test(
-          'when a user registers then the hook created exactly one '
-          'CandidateProfile and profile.me returns it, and login works',
+          'when a user registers with the emailed code then login works',
           () async {
             final email = 'alice-${rollback.name}@example.com';
             final requestId = await endpoints.emailIdp.startRegistration(
@@ -71,29 +64,6 @@ void main() {
               password: 'correct-horse-1',
             );
 
-            final profiles = await CandidateProfile.db.find(
-              sessionBuilder.build(),
-              where: (t) => t.authUserId.equals(auth.authUserId),
-            );
-            expect(profiles, hasLength(1));
-            expect(profiles.single.timeZone, 'UTC');
-
-            final authed = sessionBuilder.copyWith(
-              authentication: AuthenticationOverride.authenticationInfo(
-                auth.authUserId.uuid,
-                <Scope>{},
-              ),
-            );
-            final me = await endpoints.profile.me(authed);
-            expect(me.id, profiles.single.id);
-            final updated = await endpoints.profile.updateMe(
-              authed,
-              'Alice',
-              'Backend engineer',
-              7,
-            );
-            expect(updated.displayName, 'Alice');
-
             final login = await endpoints.emailIdp.login(
               sessionBuilder,
               email: email,
@@ -103,9 +73,9 @@ void main() {
           },
         );
 
-        test('when unauthenticated then profile.me is rejected', () async {
+        test('when unauthenticated then app endpoints are rejected', () async {
           await expectLater(
-            endpoints.profile.me(sessionBuilder),
+            endpoints.resume.listResumes(sessionBuilder),
             throwsA(isA<ServerpodUnauthenticatedException>()),
           );
         });
